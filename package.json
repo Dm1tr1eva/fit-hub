@@ -1,0 +1,21 @@
+{
+  "name": "fit-hub",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxi dev",
+    "build": "nuxi build",
+    "generate": "nuxi generate",
+    "preview": "nuxi preview"
+  },
+  "dependencies": {
+    "@google/genai": "^2.7.0",
+    "@nuxtjs/supabase": "^2.0.9",
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "@pinia/nuxt": "^0.11.3",
+    "@vite-pwa/nuxt": "^1.1.1",
+    "chart.js": "^4.5.1",
+    "nuxt": "^4.4.6",
+    "vue-chartjs": "^5.3.3"
+  }
+}
