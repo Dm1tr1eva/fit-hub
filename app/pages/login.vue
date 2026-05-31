@@ -5,27 +5,29 @@ definePageMeta({
 
 const supabase = useSupabaseClient()
 const email = ref("")
+const password = ref("")
 const loading = ref(false)
-const sent = ref(false)
 const error = ref("")
+const isRegister = ref(false)
 
-async function signIn() {
+async function submit() {
   loading.value = true
   error.value = ""
-  sent.value = false
-  const config = useRuntimeConfig()
-  const { error: err } = await supabase.auth.signInWithOtp({
-    email: email.value,
-    options: {
-      redirectTo: config.public.siteUrl + "/confirm",
-    },
-  })
+
+  const fn = isRegister.value
+    ? supabase.auth.signUp({ email: email.value, password: password.value })
+    : supabase.auth.signInWithPassword({ email: email.value, password: password.value })
+
+  const { error: err } = await fn
   if (err) {
     error.value = err.message
-  } else {
-    sent.value = true
   }
   loading.value = false
+}
+
+function toggleMode() {
+  isRegister.value = !isRegister.value
+  error.value = ""
 }
 </script>
 
@@ -35,27 +37,37 @@ async function signIn() {
       <h1 class="text-2xl font-bold text-center mb-2">Fit Hub</h1>
       <p class="text-gray-500 text-center mb-6">Трекер калорий с AI</p>
 
-      <form @submit.prevent="signIn">
+      <form @submit.prevent="submit" class="space-y-4">
         <input
           v-model="email"
           type="email"
-          placeholder="your@email.com"
-          class="w-full px-4 py-3 border border-gray-300 rounded-xl mb-4 text-center"
+          placeholder="Email"
+          class="w-full px-4 py-3 border border-gray-300 rounded-xl text-center"
+          :disabled="loading"
+        />
+        <input
+          v-model="password"
+          type="password"
+          placeholder="Пароль"
+          class="w-full px-4 py-3 border border-gray-300 rounded-xl text-center"
           :disabled="loading"
         />
         <button
           type="submit"
           class="w-full bg-blue-600 text-white py-3 rounded-xl font-medium disabled:opacity-50"
-          :disabled="loading || !email"
+          :disabled="loading || !email || !password"
         >
-          {{ loading ? "Отправка..." : "Отправить magic-link" }}
+          {{ loading ? "Загрузка..." : isRegister ? "Зарегистрироваться" : "Войти" }}
         </button>
       </form>
 
-      <p v-if="sent" class="text-green-600 text-center mt-4 text-sm">
-        Ссылка для входа отправлена на почту
-      </p>
       <p v-if="error" class="text-red-600 text-center mt-4 text-sm">{{ error }}</p>
+
+      <p class="text-center mt-4 text-sm text-gray-500">
+        <button class="text-blue-600 underline" @click="toggleMode">
+          {{ isRegister ? "Уже есть аккаунт? Войти" : "Нет аккаунта? Зарегистрироваться" }}
+        </button>
+      </p>
     </div>
   </div>
 </template>
