@@ -18,9 +18,11 @@ async function submit() {
     ? supabase.auth.signUp({ email: email.value, password: password.value })
     : supabase.auth.signInWithPassword({ email: email.value, password: password.value })
 
-  const { error: err } = await fn
+  const { data, error: err } = await fn
   if (err) {
     error.value = err.message
+  } else if (data?.user) {
+    navigateTo("/")
   }
   loading.value = false
 }
