@@ -13,7 +13,12 @@ async function signIn() {
   loading.value = true
   error.value = ""
   sent.value = false
-  const { error: err } = await supabase.auth.signInWithOtp({ email: email.value })
+  const { error: err } = await supabase.auth.signInWithOtp({
+    email: email.value,
+    options: {
+      redirectTo: window.location.origin + "/confirm",
+    },
+  })
   if (err) {
     error.value = err.message
   } else {

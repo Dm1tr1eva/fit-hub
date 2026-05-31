@@ -1,6 +1,6 @@
 export default defineNuxtRouteMiddleware((to) => {
   if (process.server) return
-  if (to.path.startsWith("/api/")) return
+  if (to.path.startsWith("/api/") || to.path === "/confirm") return
 
   const user = useSupabaseUser()
 
