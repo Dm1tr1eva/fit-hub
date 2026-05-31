@@ -13,10 +13,11 @@ async function signIn() {
   loading.value = true
   error.value = ""
   sent.value = false
+  const config = useRuntimeConfig()
   const { error: err } = await supabase.auth.signInWithOtp({
     email: email.value,
     options: {
-      redirectTo: window.location.origin + "/confirm",
+      redirectTo: config.public.siteUrl + "/confirm",
     },
   })
   if (err) {

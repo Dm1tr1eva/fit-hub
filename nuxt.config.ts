@@ -10,6 +10,7 @@ export default defineNuxtConfig({
   ],
   runtimeConfig: {
     public: {
+      siteUrl: process.env.SITE_URL || "http://localhost:3000",
       supabase: {
         url: process.env.SUPABASE_URL || "",
         key: process.env.SUPABASE_KEY || "",
