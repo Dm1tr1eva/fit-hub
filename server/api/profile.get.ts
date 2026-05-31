@@ -10,5 +10,14 @@ export default defineEventHandler(async (event) => {
     .maybeSingle()
 
   if (error) throw createError({ statusCode: 500, message: error.message })
+  if (!data) {
+    const { data: newProfile, error: insertError } = await client
+      .from("profiles")
+      .insert({ id: user.id })
+      .select()
+      .maybeSingle()
+    if (insertError) throw createError({ statusCode: 500, message: insertError.message })
+    return newProfile
+  }
   return data
 })

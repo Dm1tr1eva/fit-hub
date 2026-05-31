@@ -34,6 +34,7 @@ async function loadProfile() {
       form.value.weight_kg = data.weight_kg ?? 70
       form.value.activity_level = data.activity_level ?? "moderate"
       form.value.goal = data.goal ?? "maintain"
+      form.value.daily_calorie_goal = data.daily_calorie_goal ?? null
       goals.value = {
         daily_calorie_goal: data.daily_calorie_goal,
         daily_protein_g: data.daily_protein_g,
@@ -43,16 +44,6 @@ async function loadProfile() {
     }
   } catch {
     // profile might not exist yet
-  }
-}
-
-const manualCalories = computed(() => form.value.daily_calorie_goal !== null && form.value.daily_calorie_goal > 0)
-
-function toggleManualCalories() {
-  if (manualCalories.value) {
-    form.value.daily_calorie_goal = null
-  } else {
-    form.value.daily_calorie_goal = goals.value?.daily_calorie_goal ?? 2000
   }
 }
 
@@ -149,13 +140,9 @@ const goalOptions = [
         </select>
       </div>
 
-      <div class="border-t pt-4">
-        <label class="flex items-center gap-2 text-sm text-gray-600 mb-2">
-          <input type="checkbox" :checked="manualCalories" @change="toggleManualCalories" />
-          Указать калории вручную
-        </label>
+      <div>
+        <label class="block text-sm text-gray-600 mb-1">Калории (оставьте пустым для авторасчета)</label>
         <input
-          v-if="manualCalories"
           v-model.number="form.daily_calorie_goal"
           type="number"
           min="500"
@@ -177,10 +164,10 @@ const goalOptions = [
 
     <div v-if="goals" class="bg-white rounded-2xl shadow-sm p-4 space-y-2">
       <h2 class="font-semibold text-lg">Дневная цель</h2>
-      <p>🔥 {{ goals.daily_calorie_goal }} ккал</p>
-      <p>🥩 {{ goals.daily_protein_g }} г белка</p>
-      <p>🧈 {{ goals.daily_fat_g }} г жиров</p>
-      <p>🍚 {{ goals.daily_carb_g }} г углеводов</p>
+      <p class="flex items-center gap-2"><UIcon name="i-lucide-flame"/> {{ goals.daily_calorie_goal }} ккал</p>
+      <p class="flex items-center gap-2"><UIcon name="i-lucide-beef"/> {{ goals.daily_protein_g }} г белка</p>
+      <p class="flex items-center gap-2"><UIcon name="i-lucide-hamburger"/> {{ goals.daily_fat_g }} г жиров</p>
+      <p class="flex items-center gap-2"><UIcon name="i-lucide-croissant"/> {{ goals.daily_carb_g }} г углеводов</p>
     </div>
 
     <button

@@ -1,52 +1,59 @@
 <script setup lang="ts">
-const user = useSupabaseUser()
-const messages = ref<{ role: "user" | "ai"; text: string; items?: any[] }[]>([])
-const input = ref("")
-const loading = ref(false)
-const error = ref("")
+const user = useSupabaseUser();
+const messages = ref<{ role: "user" | "ai"; text: string; items?: any[] }[]>(
+  [],
+);
+const input = ref("");
+const loading = ref(false);
+const error = ref("");
 
-const { supported: voiceSupported, listening, start: startVoice, stop: stopVoice } = useSpeech((text) => {
-  input.value = text
-  send()
-})
+const {
+  supported: voiceSupported,
+  listening,
+  start: startVoice,
+  stop: stopVoice,
+} = useSpeech((text) => {
+  input.value = text;
+  send();
+});
 
 async function send() {
-  const msg = input.value.trim()
-  if (!msg || loading.value) return
+  const msg = input.value.trim();
+  if (!msg || loading.value) return;
 
-  messages.value.push({ role: "user", text: msg })
-  input.value = ""
-  loading.value = true
-  error.value = ""
+  messages.value.push({ role: "user", text: msg });
+  input.value = "";
+  loading.value = true;
+  error.value = "";
 
   try {
     const data = await $fetch("/api/chat", {
       method: "POST",
       body: { message: msg },
-    })
+    });
 
-    const store = useCalorieStore()
-    if (user.value?.sub) store.updateAfterChat(user.value.sub)
+    const store = useCalorieStore();
+    if (user.value?.sub) store.updateAfterChat(user.value.sub);
 
     messages.value.push({
       role: "ai",
       text: data.reply,
       items: data.items,
-    })
+    });
   } catch (e: any) {
     if (e?.status === 429) {
-      error.value = "Слишком частые запросы, попробуйте через минуту"
+      error.value = "Слишком частые запросы, попробуйте через минуту";
     } else {
-      error.value = "Ошибка при обработке запроса"
+      error.value = "Ошибка при обработке запроса";
     }
   }
 
-  loading.value = false
+  loading.value = false;
 }
 
 function toggleVoice() {
-  if (listening.value) stopVoice()
-  else startVoice()
+  if (listening.value) stopVoice();
+  else startVoice();
 }
 </script>
 
@@ -58,9 +65,11 @@ function toggleVoice() {
       <div v-for="(msg, i) in messages" :key="i">
         <div
           class="rounded-2xl px-4 py-3 max-w-[85%]"
-          :class="msg.role === 'user'
-            ? 'bg-blue-600 text-white ml-auto'
-            : 'bg-white border border-gray-200'"
+          :class="
+            msg.role === 'user'
+              ? 'bg-blue-600 text-white ml-auto'
+              : 'bg-white border border-gray-200'
+          "
         >
           <p>{{ msg.text }}</p>
         </div>
@@ -74,8 +83,8 @@ function toggleVoice() {
             <p class="font-medium">{{ item.food_name }}</p>
             <p class="text-gray-500">
               {{ item.grams ? `${item.grams} г` : "" }}
-              • {{ item.calories }} ккал
-              (Б: {{ item.protein_g ?? 0 }} Ж: {{ item.fat_g ?? 0 }} У: {{ item.carb_g ?? 0 }})
+              • {{ item.calories }} ккал (Б: {{ item.protein_g ?? 0 }} Ж:
+              {{ item.fat_g ?? 0 }} У: {{ item.carb_g ?? 0 }})
             </p>
             <p v-if="item.assumption" class="text-xs text-gray-400 italic">
               {{ item.assumption }}
@@ -97,12 +106,13 @@ function toggleVoice() {
       >
         🎤
       </button>
-      <input
+      <textarea
         v-model="input"
-        type="text"
         placeholder="Например: съел 100г риса и куриную грудку"
-        class="flex-1 px-4 py-3 border border-gray-300 rounded-xl"
-        @keyup.enter="send"
+        class="flex-1 px-4 py-3 border border-gray-300 rounded-xl resize-none"
+        rows="1"
+        @keydown.enter.exact.prevent="send"
+        @input="$event.target.style.height = 'auto'; $event.target.style.height = $event.target.scrollHeight + 'px'"
         :disabled="loading"
       />
       <button
@@ -115,3 +125,5 @@ function toggleVoice() {
     </div>
   </div>
 </template>
+
+

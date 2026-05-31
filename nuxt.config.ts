@@ -3,11 +3,15 @@ export default defineNuxtConfig({
   future: { compatibilityVersion: 4 },
   compatibilityDate: "2026-05-30",
   modules: [
-    "@nuxtjs/tailwindcss",
     "@pinia/nuxt",
     "@nuxtjs/supabase",
     "@vite-pwa/nuxt",
+    "@nuxt/ui",
   ],
+  css: ["~/assets/css/main.css"],
+  colorMode: {
+    preference: "light",
+  },
   runtimeConfig: {
     public: {
       siteUrl: process.env.SITE_URL || "http://localhost:3000",

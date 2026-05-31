@@ -27,19 +27,19 @@ const macroDetails = computed(() => {
     {
       label: "Белки",
       current: store.totals.protein,
-      goal: store.dailyGoal ? Math.round((store.dailyGoal * 0.25) / 4) : 0,
+      goal: store.dailyProtein,
       color: "bg-blue-500",
     },
     {
       label: "Жиры",
       current: store.totals.fat,
-      goal: store.dailyGoal ? Math.round((store.dailyGoal * 0.25) / 9) : 0,
+      goal: store.dailyFat,
       color: "bg-yellow-500",
     },
     {
       label: "Углеводы",
       current: store.totals.carb,
-      goal: store.dailyGoal ? Math.round((store.dailyGoal * 0.5) / 4) : 0,
+      goal: store.dailyCarb,
       color: "bg-green-500",
     },
   ]

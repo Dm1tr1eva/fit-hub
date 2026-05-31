@@ -7,6 +7,9 @@ export const useCalorieStore = defineStore("calories", () => {
   } | null>(null)
 
   const dailyGoal = ref<number | null>(null)
+  const dailyProtein = ref<number>(0)
+  const dailyFat = ref<number>(0)
+  const dailyCarb = ref<number>(0)
   const todayMeals = ref<any[]>([])
 
   async function loadToday(userId: string) {
@@ -38,6 +41,9 @@ export const useCalorieStore = defineStore("calories", () => {
     }
     if (profileRes.data) {
       dailyGoal.value = profileRes.data.daily_calorie_goal
+      dailyProtein.value = profileRes.data.daily_protein_g ?? 0
+      dailyFat.value = profileRes.data.daily_fat_g ?? 0
+      dailyCarb.value = profileRes.data.daily_carb_g ?? 0
     }
   }
 
@@ -45,5 +51,5 @@ export const useCalorieStore = defineStore("calories", () => {
     loadToday(userId)
   }
 
-  return { totals, dailyGoal, todayMeals, loadToday, updateAfterChat }
+  return { totals, dailyGoal, dailyProtein, dailyFat, dailyCarb, todayMeals, loadToday, updateAfterChat }
 })
