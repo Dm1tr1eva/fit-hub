@@ -194,15 +194,30 @@ body {
   }
 }
 
-/* ---- Favorites grid (TransitionGroup name="fav") -------------------- */
-/* Grid-safe variant (no absolute leave): a card glows in, fades/shrinks out.
-   Used by the mobile sheet's 2-col grid where absolute positioning would
-   break the layout. */
+/* ---- Favorites "added" glow ----------------------------------------- */
+/* INSET glow + bg flash, NOT an outer halo: the favorites lists live inside
+   scroll/clip containers (the rail accordion, the mobile sheet), and an outer
+   box-shadow gets clipped by those overflow ancestors. An inset glow paints
+   inside the card, so the neon flash stays fully visible regardless. */
+@keyframes fav-glow {
+  0% {
+    box-shadow:
+      inset 0 0 0 1px rgba(34, 211, 238, 0.95),
+      inset 0 0 26px 2px rgba(34, 211, 238, 0.6);
+  }
+  100% {
+    box-shadow:
+      inset 0 0 0 1px rgba(34, 211, 238, 0),
+      inset 0 0 0 0 rgba(34, 211, 238, 0);
+  }
+}
+
+/* Mobile sheet grid (name="fav") — grid-safe: no absolute leave. */
 .fav-enter-active {
   transition:
     opacity 0.35s ease,
     transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
-  animation: meal-glow 0.9s ease-out 0.05s;
+  animation: fav-glow 0.9s ease-out 0.05s;
 }
 .fav-enter-from {
   opacity: 0;
@@ -218,10 +233,40 @@ body {
 .fav-move {
   transition: transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
+
+/* Desktop rail (name="fav-rail") — single column: drop in from the top, slide
+   out sideways, siblings glide via move. Same clip-safe inset glow. */
+.fav-rail-enter-active {
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+  animation: fav-glow 1s ease-out 0.05s;
+}
+.fav-rail-enter-from {
+  opacity: 0;
+  transform: translateY(-14px) scale(0.97);
+}
+/* In-flow leave (NOT absolute): the rail's cards live in a scroll container, and
+   an absolutely-positioned leaving card extends past the shrunken content →
+   flashes a vertical scrollbar. Fading in place keeps it within the container. */
+.fav-rail-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.fav-rail-leave-to {
+  opacity: 0;
+  transform: scale(0.96);
+}
+.fav-rail-move {
+  transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fav-enter-active,
   .fav-leave-active,
-  .fav-move {
+  .fav-move,
+  .fav-rail-enter-active,
+  .fav-rail-leave-active,
+  .fav-rail-move {
     transition: none;
     animation: none;
   }

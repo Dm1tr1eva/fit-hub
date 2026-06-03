@@ -102,7 +102,7 @@ onMounted(() => {
       >
         <div class="min-h-0 overflow-hidden">
           <div class="max-h-[58vh] overflow-x-hidden overflow-y-auto px-1.5 pb-1.5 pt-0.5">
-            <TransitionGroup name="meal" tag="div" class="relative flex flex-col gap-2">
+            <TransitionGroup name="fav-rail" tag="div" class="relative flex flex-col gap-2">
               <FavoriteCard
                 v-for="card in group.cards"
                 :key="cardKey(card)"
