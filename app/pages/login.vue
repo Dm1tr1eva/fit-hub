@@ -66,9 +66,9 @@ function toggleMode() {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-    <div class="max-w-sm w-full bg-white rounded-2xl shadow-sm p-8">
-      <h1 class="text-2xl font-bold text-center mb-2">Fit Hub</h1>
+  <div class="min-h-screen flex items-center justify-center p-4 text-gray-200">
+    <div class="neon-card glow-cyan max-w-sm w-full rounded-2xl p-8">
+      <h1 class="glow-text text-2xl font-bold text-center mb-2 text-cyan-300">Fit Hub</h1>
       <p class="text-gray-500 text-center mb-6">AI calorie tracker</p>
 
       <form @submit.prevent="submit" class="space-y-4">
@@ -76,29 +76,29 @@ function toggleMode() {
           v-model="email"
           type="email"
           placeholder="Email"
-          class="w-full px-4 py-3 border border-gray-300 rounded-xl text-center"
+          class="neon-input w-full px-4 py-3 rounded-xl text-center"
           :disabled="loading"
         />
         <input
           v-model="password"
           type="password"
           placeholder="Password"
-          class="w-full px-4 py-3 border border-gray-300 rounded-xl text-center"
+          class="neon-input w-full px-4 py-3 rounded-xl text-center"
           :disabled="loading"
         />
         <button
           type="submit"
-          class="w-full bg-blue-600 text-white py-3 rounded-xl font-medium disabled:opacity-50"
+          class="btn-neon w-full py-3 rounded-xl font-medium disabled:opacity-50 disabled:shadow-none"
           :disabled="loading || !email || !password"
         >
           {{ loading ? "Loading..." : isRegister ? "Sign up" : "Sign in" }}
         </button>
       </form>
 
-      <p v-if="error" class="text-red-600 text-center mt-4 text-sm">{{ error }}</p>
+      <p v-if="error" class="text-rose-400 text-center mt-4 text-sm">{{ error }}</p>
 
       <p class="text-center mt-4 text-sm text-gray-500">
-        <button class="text-blue-600 underline" @click="toggleMode">
+        <button class="text-cyan-400 underline hover:text-cyan-300" @click="toggleMode">
           {{ isRegister ? "Already have an account? Sign in" : "No account? Sign up" }}
         </button>
       </p>

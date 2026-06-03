@@ -27,7 +27,7 @@ const maxWeekKcal = computed(() => Math.max(...weekBars.value.map((d) => d.kcal)
 
 <template>
   <div>
-    <h2 class="font-semibold mb-2">Week</h2>
+    <h2 class="font-semibold mb-2 text-gray-200">Week</h2>
     <div class="flex gap-2">
       <button
         v-for="day in weekBars"
@@ -42,11 +42,11 @@ const maxWeekKcal = computed(() => Math.max(...weekBars.value.map((d) => d.kcal)
             :class="
               day.date === selected
                 ? day.kcal > 0
-                  ? 'bg-blue-700'
-                  : 'bg-gray-300'
+                  ? 'bg-cyan-300 shadow-[0_0_12px_rgba(34,211,238,0.85)]'
+                  : 'bg-white/20'
                 : day.kcal > 0
-                  ? 'bg-blue-500'
-                  : 'bg-gray-200'
+                  ? 'bg-cyan-500/70 shadow-[0_0_8px_rgba(34,211,238,0.45)]'
+                  : 'bg-white/10'
             "
             :style="{
               height: day.kcal > 0 ? Math.max(4, (day.kcal / maxWeekKcal) * 100) + '%' : '4px',
@@ -56,7 +56,7 @@ const maxWeekKcal = computed(() => Math.max(...weekBars.value.map((d) => d.kcal)
         </div>
         <span
           class="mt-1 text-[10px] capitalize"
-          :class="day.date === selected ? 'font-semibold text-blue-700' : 'text-gray-400'"
+          :class="day.date === selected ? 'font-semibold text-cyan-300' : 'text-gray-500'"
         >
           {{ day.label }}
         </span>

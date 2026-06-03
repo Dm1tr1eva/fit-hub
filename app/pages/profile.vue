@@ -91,83 +91,83 @@ const goalOptions = [
 
 <template>
   <div class="p-4 max-w-md mx-auto space-y-6">
-    <h1 class="text-2xl font-bold">Profile</h1>
+    <h1 class="text-2xl font-bold text-gray-100">Profile</h1>
 
     <form @submit.prevent="save" class="space-y-4">
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Name</label>
-        <input v-model="form.name" class="w-full px-4 py-2 border border-gray-300 rounded-xl" />
+        <label class="block text-sm text-gray-400 mb-1">Name</label>
+        <input v-model="form.name" class="w-full px-4 py-2 neon-input rounded-xl" />
       </div>
 
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Sex</label>
-        <select v-model="form.sex" class="w-full px-4 py-2 border border-gray-300 rounded-xl">
+        <label class="block text-sm text-gray-400 mb-1">Sex</label>
+        <select v-model="form.sex" class="w-full px-4 py-2 neon-input rounded-xl">
           <option value="male">Male</option>
           <option value="female">Female</option>
         </select>
       </div>
 
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Age</label>
-        <input v-model.number="form.age" type="number" min="5" max="120" class="w-full px-4 py-2 border border-gray-300 rounded-xl" />
+        <label class="block text-sm text-gray-400 mb-1">Age</label>
+        <input v-model.number="form.age" type="number" min="5" max="120" class="w-full px-4 py-2 neon-input rounded-xl" />
       </div>
 
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Height (cm)</label>
-        <input v-model.number="form.height_cm" type="number" min="50" max="260" class="w-full px-4 py-2 border border-gray-300 rounded-xl" />
+        <label class="block text-sm text-gray-400 mb-1">Height (cm)</label>
+        <input v-model.number="form.height_cm" type="number" min="50" max="260" class="w-full px-4 py-2 neon-input rounded-xl" />
       </div>
 
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Weight (kg)</label>
-        <input v-model.number="form.weight_kg" type="number" min="20" max="400" step="0.1" class="w-full px-4 py-2 border border-gray-300 rounded-xl" />
+        <label class="block text-sm text-gray-400 mb-1">Weight (kg)</label>
+        <input v-model.number="form.weight_kg" type="number" min="20" max="400" step="0.1" class="w-full px-4 py-2 neon-input rounded-xl" />
       </div>
 
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Activity</label>
-        <select v-model="form.activity_level" class="w-full px-4 py-2 border border-gray-300 rounded-xl">
+        <label class="block text-sm text-gray-400 mb-1">Activity</label>
+        <select v-model="form.activity_level" class="w-full px-4 py-2 neon-input rounded-xl">
           <option v-for="opt in activityOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
         </select>
       </div>
 
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Goal</label>
-        <select v-model="form.goal" class="w-full px-4 py-2 border border-gray-300 rounded-xl">
+        <label class="block text-sm text-gray-400 mb-1">Goal</label>
+        <select v-model="form.goal" class="w-full px-4 py-2 neon-input rounded-xl">
           <option v-for="opt in goalOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
         </select>
       </div>
 
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Calories (leave empty to auto-calculate)</label>
+        <label class="block text-sm text-gray-400 mb-1">Calories (leave empty to auto-calculate)</label>
         <input
           v-model.number="form.daily_calorie_goal"
           type="number"
           min="500"
           max="10000"
-          class="w-full px-4 py-2 border border-gray-300 rounded-xl"
+          class="w-full px-4 py-2 neon-input rounded-xl"
         />
       </div>
 
       <button
         type="submit"
-        class="w-full bg-blue-600 text-white py-3 rounded-xl font-medium disabled:opacity-50"
+        class="btn-neon w-full py-3 rounded-xl font-medium disabled:opacity-50 disabled:shadow-none"
         :disabled="saving"
       >
         {{ saving ? "Saving..." : "Save" }}
       </button>
 
-      <p v-if="saved" class="text-green-600 text-sm text-center">Saved!</p>
+      <p v-if="saved" class="text-emerald-400 text-sm text-center">Saved!</p>
     </form>
 
-    <div v-if="goals" class="bg-white rounded-2xl shadow-sm p-4 space-y-2">
-      <h2 class="font-semibold text-lg">Daily goal</h2>
-      <p class="flex items-center gap-2"><UIcon name="i-lucide-flame"/> {{ goals.daily_calorie_goal }} kcal</p>
-      <p class="flex items-center gap-2"><UIcon name="i-lucide-beef"/> {{ goals.daily_protein_g }} g protein</p>
-      <p class="flex items-center gap-2"><UIcon name="i-lucide-hamburger"/> {{ goals.daily_fat_g }} g fat</p>
-      <p class="flex items-center gap-2"><UIcon name="i-lucide-croissant"/> {{ goals.daily_carb_g }} g carbs</p>
+    <div v-if="goals" class="neon-card rounded-2xl p-4 space-y-2">
+      <h2 class="font-semibold text-lg text-gray-100">Daily goal</h2>
+      <p class="flex items-center gap-2"><UIcon name="i-lucide-flame" class="text-cyan-400"/> {{ goals.daily_calorie_goal }} kcal</p>
+      <p class="flex items-center gap-2"><UIcon name="i-lucide-beef" class="text-sky-400"/> {{ goals.daily_protein_g }} g protein</p>
+      <p class="flex items-center gap-2"><UIcon name="i-lucide-hamburger" class="text-amber-400"/> {{ goals.daily_fat_g }} g fat</p>
+      <p class="flex items-center gap-2"><UIcon name="i-lucide-croissant" class="text-emerald-400"/> {{ goals.daily_carb_g }} g carbs</p>
     </div>
 
     <button
-      class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-medium hover:bg-red-100 transition-colors"
+      class="w-full rounded-xl border border-rose-500/20 bg-rose-500/10 py-3 font-medium text-rose-300 transition-colors hover:bg-rose-500/20"
       @click="logout"
     >
       Log out

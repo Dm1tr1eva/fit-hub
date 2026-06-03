@@ -10,7 +10,7 @@ export default defineNuxtConfig({
   ],
   css: ["~/assets/css/main.css"],
   colorMode: {
-    preference: "light",
+    preference: "dark",
   },
   runtimeConfig: {
     public: {
@@ -39,8 +39,8 @@ export default defineNuxtConfig({
       name: "Fit Hub",
       short_name: "FitHub",
       description: "AI трекер калорий",
-      theme_color: "#3b82f6",
-      background_color: "#ffffff",
+      theme_color: "#0a0a0f",
+      background_color: "#0a0a0f",
       display: "standalone",
       orientation: "portrait",
       icons: [

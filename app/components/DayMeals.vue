@@ -127,21 +127,21 @@ async function favoriteMeal(meal: any) {
   <div>
     <div class="mb-2 flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <h2 class="font-semibold capitalize">{{ dayHeading(date) }}</h2>
+        <h2 class="font-semibold capitalize text-gray-200">{{ dayHeading(date) }}</h2>
         <button
           v-if="!isToday"
           type="button"
-          class="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700"
+          class="flex items-center gap-1 text-xs font-medium text-cyan-400 hover:text-cyan-300"
           @click="emit('back')"
         >
           <UIcon name="i-lucide-rotate-ccw" class="h-3.5 w-3.5" /> Today
         </button>
       </div>
       <div class="flex items-center gap-3">
-        <span v-if="flash" class="text-xs font-medium text-green-600">{{ flash }}</span>
+        <span v-if="flash" class="text-xs font-medium text-emerald-400">{{ flash }}</span>
         <button
           v-if="isToday"
-          class="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
+          class="flex items-center gap-1 text-sm font-medium text-cyan-400 hover:text-cyan-300"
           @click="openAdd"
         >
           <UIcon name="i-lucide-plus" class="h-4 w-4" /> Add
@@ -149,50 +149,52 @@ async function favoriteMeal(meal: any) {
       </div>
     </div>
 
-    <div v-if="selectedMeals.length === 0" class="text-gray-400 text-sm">
+    <div v-if="selectedMeals.length === 0" class="text-gray-500 text-sm">
       {{ isToday ? "Nothing logged yet" : "Nothing logged that day" }}
     </div>
 
-    <div
-      v-for="meal in selectedMeals"
-      :key="meal.id"
-      class="bg-white rounded-xl p-3 mb-2 shadow-sm flex justify-between items-start"
-    >
-      <div>
-        <p class="font-medium">{{ meal.food_name }}</p>
-        <p class="text-sm text-gray-500">
-          {{ meal.grams ? `${meal.grams} g · ` : "" }}{{ meal.calories }} kcal
-        </p>
-        <p class="text-xs text-gray-400">
-          P {{ meal.protein_g ?? 0 }} · F {{ meal.fat_g ?? 0 }} · C {{ meal.carb_g ?? 0 }}
-        </p>
-        <p v-if="meal.assumption" class="text-xs text-gray-400 italic">{{ meal.assumption }}</p>
+    <TransitionGroup name="meal" tag="div" class="relative">
+      <div
+        v-for="meal in selectedMeals"
+        :key="meal._key ?? meal.id"
+        class="neon-card rounded-xl p-3 mb-2 flex justify-between items-start"
+      >
+        <div>
+          <p class="font-medium text-gray-100">{{ meal.food_name }}</p>
+          <p class="text-sm text-gray-400">
+            {{ meal.grams ? `${meal.grams} g · ` : "" }}{{ meal.calories }} kcal
+          </p>
+          <p class="text-xs text-gray-500">
+            P {{ meal.protein_g ?? 0 }} · F {{ meal.fat_g ?? 0 }} · C {{ meal.carb_g ?? 0 }}
+          </p>
+          <p v-if="meal.assumption" class="text-xs text-gray-500 italic">{{ meal.assumption }}</p>
+        </div>
+        <div class="ml-2 flex shrink-0 items-center gap-1">
+          <button
+            class="p-1 hover:text-amber-300"
+            :class="isFavorite(meal) ? 'text-amber-300 drop-shadow-[0_0_5px_rgba(251,191,36,0.7)]' : 'text-gray-500'"
+            :aria-label="isFavorite(meal) ? 'In favorites' : 'Add to favorites'"
+            @click="favoriteMeal(meal)"
+          >
+            <UIcon name="i-lucide-star" class="h-4 w-4" />
+          </button>
+          <button
+            class="p-1 text-gray-500 hover:text-cyan-400"
+            aria-label="Edit"
+            @click="openEdit(meal)"
+          >
+            <UIcon name="i-lucide-pencil" class="h-4 w-4" />
+          </button>
+          <button
+            class="p-1 text-gray-500 hover:text-rose-400"
+            aria-label="Delete"
+            @click="deleteMeal(meal.id)"
+          >
+            <UIcon name="i-lucide-trash-2" class="h-4 w-4" />
+          </button>
+        </div>
       </div>
-      <div class="ml-2 flex shrink-0 items-center gap-1">
-        <button
-          class="p-1 hover:text-yellow-500"
-          :class="isFavorite(meal) ? 'text-yellow-500' : 'text-gray-400'"
-          :aria-label="isFavorite(meal) ? 'In favorites' : 'Add to favorites'"
-          @click="favoriteMeal(meal)"
-        >
-          <UIcon name="i-lucide-star" class="h-4 w-4" />
-        </button>
-        <button
-          class="p-1 text-gray-400 hover:text-blue-600"
-          aria-label="Edit"
-          @click="openEdit(meal)"
-        >
-          <UIcon name="i-lucide-pencil" class="h-4 w-4" />
-        </button>
-        <button
-          class="p-1 text-gray-400 hover:text-red-600"
-          aria-label="Delete"
-          @click="deleteMeal(meal.id)"
-        >
-          <UIcon name="i-lucide-trash-2" class="h-4 w-4" />
-        </button>
-      </div>
-    </div>
+    </TransitionGroup>
 
     <FoodEntryModal v-model:open="modalOpen" :entry="editingEntry" @submit="onSubmit" />
   </div>

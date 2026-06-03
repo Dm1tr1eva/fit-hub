@@ -1,2 +1,217 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+
+/* =========================================================================
+   FitHub — dark "neon" theme
+   Cyan primary; each macro glows its own neon (protein/fat/carbs).
+   Reusable helpers below keep the glow consistent across components instead
+   of repeating box-shadows inline.
+   ========================================================================= */
+:root {
+  --fh-bg: #0a0a0f;
+  --fh-bg-soft: #101019;
+  --fh-surface: rgba(255, 255, 255, 0.045);
+  --fh-surface-strong: rgba(255, 255, 255, 0.07);
+  --fh-border: rgba(255, 255, 255, 0.09);
+
+  --neon-cyan: #22d3ee;
+  --neon-blue: #38bdf8; /* protein */
+  --neon-amber: #fbbf24; /* fat */
+  --neon-emerald: #34d399; /* carbs */
+  --neon-pink: #f472b6;
+  --neon-red: #fb7185;
+}
+
+html,
+body,
+#__nuxt {
+  background-color: var(--fh-bg);
+  color: #e5e7eb;
+}
+
+/* Subtle radial wash so the background isn't a flat black slab. */
+body {
+  background-image:
+    radial-gradient(60rem 60rem at 15% -10%, rgba(34, 211, 238, 0.06), transparent 60%),
+    radial-gradient(50rem 50rem at 110% 10%, rgba(244, 114, 182, 0.05), transparent 55%);
+  background-attachment: fixed;
+}
+
+/* ---- Surfaces -------------------------------------------------------- */
+.neon-card {
+  background: var(--fh-surface);
+  border: 1px solid var(--fh-border);
+  backdrop-filter: blur(10px);
+}
+.neon-panel {
+  background: color-mix(in srgb, var(--fh-bg-soft) 88%, transparent);
+  border: 1px solid var(--fh-border);
+  backdrop-filter: blur(1px);
+}
+.neon-hover:hover {
+  background: var(--fh-surface-strong);
+}
+
+/* ---- Outer glows (containers, ring, buttons) ------------------------- */
+.glow-cyan {
+  box-shadow: 0 0 18px -2px rgba(34, 211, 238, 0.55), 0 0 6px -1px rgba(34, 211, 238, 0.4);
+}
+.glow-blue {
+  box-shadow: 0 0 18px -2px rgba(56, 189, 248, 0.55);
+}
+.glow-amber {
+  box-shadow: 0 0 18px -2px rgba(251, 191, 36, 0.5);
+}
+.glow-emerald {
+  box-shadow: 0 0 18px -2px rgba(52, 211, 153, 0.5);
+}
+.glow-pink {
+  box-shadow: 0 0 18px -2px rgba(244, 114, 182, 0.5);
+}
+
+/* ---- Progress-bar fills (background + matching glow) ----------------- */
+.fill-blue {
+  background: var(--neon-blue);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.75);
+}
+.fill-amber {
+  background: var(--neon-amber);
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.75);
+}
+.fill-emerald {
+  background: var(--neon-emerald);
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.75);
+}
+.fill-cyan {
+  background: var(--neon-cyan);
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.75);
+}
+
+/* ---- Text glow ------------------------------------------------------- */
+.glow-text {
+  text-shadow: 0 0 14px rgba(34, 211, 238, 0.55);
+}
+
+/* ---- Primary neon button -------------------------------------------- */
+.btn-neon {
+  background: linear-gradient(135deg, #22d3ee, #0ea5e9);
+  color: #04141c;
+  box-shadow: 0 0 18px -3px rgba(34, 211, 238, 0.65);
+  transition: box-shadow 0.2s ease, transform 0.1s ease;
+}
+.btn-neon:hover:not(:disabled) {
+  box-shadow: 0 0 26px -1px rgba(34, 211, 238, 0.85);
+}
+.btn-neon:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* ---- Dark form controls --------------------------------------------- */
+.neon-input {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--fh-border);
+  color: #e5e7eb;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.neon-input::placeholder {
+  color: #6b7280;
+}
+.neon-input:focus {
+  outline: none;
+  border-color: rgba(34, 211, 238, 0.6);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15);
+}
+/* Make native select dropdowns legible on dark. */
+.neon-input option {
+  background: #101019;
+  color: #e5e7eb;
+}
+
+/* ---- Chat prompt (Nuxt UI UChatPrompt root, variant="naked") -------- */
+.neon-prompt {
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 0 0 1px var(--fh-border);
+  transition: box-shadow 0.15s ease;
+}
+.neon-prompt:focus-within {
+  box-shadow:
+    inset 0 0 0 1px rgba(34, 211, 238, 0.5),
+    0 0 0 3px rgba(34, 211, 238, 0.12);
+}
+/* Pin the input text to a light color so it never depends on color-mode
+   state (avoids a black-on-black flash before `.dark` is applied). */
+.neon-prompt textarea {
+  color: #e5e7eb;
+  -webkit-text-fill-color: #e5e7eb;
+  caret-color: var(--neon-cyan);
+}
+.neon-prompt textarea::placeholder {
+  color: #6b7280;
+  -webkit-text-fill-color: #6b7280;
+}
+
+/* ---- Meal list entrance (TransitionGroup name="meal") --------------- */
+/* New cards drop in from the top with a cyan neon glow that fades to normal;
+   the rest slide down smoothly to make room. */
+@keyframes meal-glow {
+  0% {
+    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.9), 0 0 22px 2px rgba(34, 211, 238, 0.65);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 211, 238, 0), 0 0 0 0 rgba(34, 211, 238, 0);
+  }
+}
+.meal-enter-active {
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+  animation: meal-glow 0.9s ease-out 0.1s;
+}
+.meal-enter-from {
+  opacity: 0;
+  transform: translateY(-16px) scale(0.96);
+}
+.meal-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  /* Pull out of flow so siblings glide up into the gap. */
+  position: absolute;
+  width: 100%;
+}
+.meal-leave-to {
+  opacity: 0;
+  transform: translateX(24px) scale(0.96);
+}
+.meal-move {
+  transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .meal-enter-active,
+  .meal-leave-active,
+  .meal-move {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* ---- Scrollbars: thin, dark, cyan on hover -------------------------- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(34, 211, 238, 0.55);
+}

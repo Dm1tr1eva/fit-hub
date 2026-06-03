@@ -103,7 +103,7 @@ function save() {
     >
       <div
         v-if="open"
-        class="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 p-4 sm:items-center"
+        class="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 p-4 sm:items-center"
         @click.self="close"
       >
         <Transition
@@ -113,12 +113,12 @@ function save() {
           leave-to-class="translate-y-6 opacity-0 sm:scale-95"
           appear
         >
-          <div class="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
+          <div class="neon-panel glow-cyan w-full max-w-sm rounded-2xl p-5">
             <div class="mb-4 flex items-center justify-between">
-              <h2 class="text-lg font-semibold">{{ title }}</h2>
+              <h2 class="text-lg font-semibold text-gray-100">{{ title }}</h2>
               <button
                 type="button"
-                class="text-gray-400 hover:text-gray-700"
+                class="text-gray-500 hover:text-gray-200"
                 aria-label="Close"
                 @click="close"
               >
@@ -128,71 +128,71 @@ function save() {
 
             <form class="space-y-3" @submit.prevent="save">
               <div>
-                <label class="mb-1 block text-sm text-gray-600">Name</label>
+                <label class="mb-1 block text-sm text-gray-400">Name</label>
                 <input
                   v-model="form.food_name"
                   type="text"
                   placeholder="e.g. oatmeal"
-                  class="w-full rounded-xl border border-gray-300 px-4 py-2"
+                  class="w-full rounded-xl neon-input px-4 py-2"
                 />
               </div>
 
               <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <label class="mb-1 block text-sm text-gray-600">Grams</label>
+                  <label class="mb-1 block text-sm text-gray-400">Grams</label>
                   <input
                     v-model.number="form.grams"
                     type="number"
                     min="0"
                     step="any"
                     placeholder="—"
-                    class="w-full rounded-xl border border-gray-300 px-4 py-2"
+                    class="w-full rounded-xl neon-input px-4 py-2"
                   />
                 </div>
                 <div>
-                  <label class="mb-1 block text-sm text-gray-600">Calories *</label>
+                  <label class="mb-1 block text-sm text-gray-400">Calories *</label>
                   <input
                     v-model.number="form.calories"
                     type="number"
                     min="0"
                     step="any"
-                    class="w-full rounded-xl border border-gray-300 px-4 py-2"
+                    class="w-full rounded-xl neon-input px-4 py-2"
                   />
                 </div>
               </div>
 
               <div class="grid grid-cols-3 gap-3">
                 <div>
-                  <label class="mb-1 block text-sm text-gray-600">Protein</label>
+                  <label class="mb-1 block text-sm text-gray-400">Protein</label>
                   <input
                     v-model.number="form.protein_g"
                     type="number"
                     min="0"
                     step="any"
                     placeholder="0"
-                    class="w-full rounded-xl border border-gray-300 px-3 py-2"
+                    class="w-full rounded-xl neon-input px-3 py-2"
                   />
                 </div>
                 <div>
-                  <label class="mb-1 block text-sm text-gray-600">Fat</label>
+                  <label class="mb-1 block text-sm text-gray-400">Fat</label>
                   <input
                     v-model.number="form.fat_g"
                     type="number"
                     min="0"
                     step="any"
                     placeholder="0"
-                    class="w-full rounded-xl border border-gray-300 px-3 py-2"
+                    class="w-full rounded-xl neon-input px-3 py-2"
                   />
                 </div>
                 <div>
-                  <label class="mb-1 block text-sm text-gray-600">Carbs</label>
+                  <label class="mb-1 block text-sm text-gray-400">Carbs</label>
                   <input
                     v-model.number="form.carb_g"
                     type="number"
                     min="0"
                     step="any"
                     placeholder="0"
-                    class="w-full rounded-xl border border-gray-300 px-3 py-2"
+                    class="w-full rounded-xl neon-input px-3 py-2"
                   />
                 </div>
               </div>
@@ -200,14 +200,14 @@ function save() {
               <div class="flex gap-2 pt-2">
                 <button
                   type="button"
-                  class="flex-1 rounded-xl bg-gray-100 py-3 font-medium text-gray-700 hover:bg-gray-200"
+                  class="flex-1 rounded-xl border border-white/10 bg-white/5 py-3 font-medium text-gray-300 hover:bg-white/10"
                   @click="close"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  class="flex-1 rounded-xl bg-blue-600 py-3 font-medium text-white disabled:opacity-50"
+                  class="btn-neon flex-1 rounded-xl py-3 font-medium disabled:opacity-50 disabled:shadow-none"
                   :disabled="!canSave"
                 >
                   Save

@@ -116,12 +116,16 @@ export const useCalorieStore = defineStore("calories", () => {
 
   function addLocalMeal(meal: any, scope: Scope = "today") {
     const a = scoped(scope)
-    a.value = [meal, ...a.value]
+    // Tag with a stable client key so the optimistic→confirmed swap below keeps
+    // the same v-for key. Otherwise <TransitionGroup> sees the temp id leave and
+    // the real id enter, and re-animates the card (a double "appear"). Server
+    // rows have no _key and fall back to their id.
+    a.value = [{ ...meal, _key: meal._key ?? meal.id }, ...a.value]
   }
   function replaceLocalMeal(tempId: string, row: any, scope: Scope = "today") {
     const a = scoped(scope)
     const i = a.value.findIndex((m) => m.id === tempId)
-    if (i !== -1) a.value[i] = row
+    if (i !== -1) a.value[i] = { ...row, _key: a.value[i]._key } // preserve key
   }
   function removeLocalMeal(id: string, scope: Scope = "today") {
     const a = scoped(scope)

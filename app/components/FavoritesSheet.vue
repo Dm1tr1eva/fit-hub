@@ -38,7 +38,7 @@ function close() {
       leave-to-class="opacity-0"
     >
       <div v-if="open" class="fixed inset-0 z-40 flex items-end lg:hidden" @click.self="close">
-        <div class="absolute inset-0 bg-black/20" @click="close" />
+        <div class="absolute inset-0 bg-black/60" @click="close" />
 
         <Transition
           enter-active-class="transition duration-200 ease-out"
@@ -49,18 +49,18 @@ function close() {
         >
           <div
             v-if="open"
-            class="relative mx-auto flex max-h-[60dvh] w-full max-w-md flex-col rounded-t-2xl bg-gray-50 shadow-2xl"
+            class="neon-panel relative mx-auto flex max-h-[60dvh] w-full max-w-md flex-col rounded-t-2xl shadow-2xl"
           >
-            <header class="flex shrink-0 items-center justify-between rounded-t-2xl border-b border-gray-200 bg-white px-4 py-3">
+            <header class="flex shrink-0 items-center justify-between rounded-t-2xl border-b border-white/10 px-4 py-3">
               <div class="flex items-center gap-2">
-                <UIcon name="i-lucide-star" class="h-5 w-5 text-yellow-500" />
-                <h2 class="font-semibold">Favorites</h2>
-                <span v-if="flash" class="text-xs font-medium text-green-600">{{ flash }}</span>
+                <UIcon name="i-lucide-star" class="h-5 w-5 text-amber-300" />
+                <h2 class="font-semibold text-gray-200">Favorites</h2>
+                <span v-if="flash" class="text-xs font-medium text-emerald-400">{{ flash }}</span>
               </div>
               <div class="flex items-center gap-1">
                 <button
                   type="button"
-                  class="p-1 text-gray-400 hover:text-blue-600"
+                  class="p-1 text-gray-500 hover:text-cyan-400"
                   aria-label="Create card"
                   @click="createOpen = true"
                 >
@@ -68,7 +68,7 @@ function close() {
                 </button>
                 <button
                   type="button"
-                  class="p-1 text-gray-400 hover:text-gray-700"
+                  class="p-1 text-gray-500 hover:text-gray-200"
                   aria-label="Close"
                   @click="close"
                 >
@@ -79,17 +79,17 @@ function close() {
 
             <div class="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
               <section v-for="group in groups" :key="group.title">
-                <p class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                <p class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                   {{ group.title }}
                 </p>
                 <div class="grid grid-cols-2 gap-3">
                   <div v-for="card in group.cards" :key="cardKey(card)" class="relative">
                     <button
                       type="button"
-                      class="flex h-[72px] w-full flex-col justify-center rounded-xl bg-white p-3 text-left shadow-sm transition-shadow hover:shadow"
+                      class="neon-card neon-hover flex h-[72px] w-full flex-col justify-center rounded-xl p-3 text-left transition-colors"
                       @click="quickAdd(card, $event.currentTarget)"
                     >
-                      <p class="truncate pr-4 text-sm font-medium">{{ card.food_name }}</p>
+                      <p class="truncate pr-4 text-sm font-medium text-gray-100">{{ card.food_name }}</p>
                       <p class="truncate text-xs text-gray-500">
                         {{ card.calories }} kcal<template v-if="card.grams"> · {{ card.grams }}g</template>
                       </p>
@@ -98,7 +98,7 @@ function close() {
                     <button
                       v-if="card.source === 'favorite'"
                       type="button"
-                      class="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-red-100 hover:text-red-600"
+                      class="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-gray-400 hover:bg-rose-500/20 hover:text-rose-300"
                       aria-label="Remove from favorites"
                       @click="removeFavorite(card)"
                     >
@@ -107,7 +107,7 @@ function close() {
                     <button
                       v-else
                       type="button"
-                      class="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gray-100 text-gray-400 hover:bg-yellow-100 hover:text-yellow-600"
+                      class="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-gray-400 hover:bg-amber-400/20 hover:text-amber-300"
                       aria-label="Save to favorites"
                       @click="saveFavorite(card)"
                     >
@@ -117,7 +117,7 @@ function close() {
                 </div>
               </section>
 
-              <p v-if="!groups.length" class="text-center text-sm text-gray-400">
+              <p v-if="!groups.length" class="text-center text-sm text-gray-500">
                 Empty for now. Create a card or star ⭐ a meal from your log.
               </p>
             </div>

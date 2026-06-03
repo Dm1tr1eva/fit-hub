@@ -178,7 +178,7 @@ async function send() {
       v-if="!open"
       type="button"
       aria-label="Open AI chat"
-      class="fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg transition-colors hover:bg-blue-700 active:scale-95"
+      class="btn-neon fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full active:scale-95"
       @click="toggle"
     >
       <UIcon name="i-lucide-message-circle" class="h-6 w-6" />
@@ -197,23 +197,23 @@ async function send() {
     <div
       v-if="open"
       :style="panelStyle"
-      class="fixed z-40 flex origin-bottom flex-col overflow-hidden rounded-2xl bg-gray-50 shadow-2xl ring-1 ring-gray-200"
+      class="neon-panel fixed z-40 flex origin-bottom flex-col overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10"
       :class="{ 'select-none': dragging }"
     >
       <!-- Header doubles as the drag handle -->
       <header
-        class="flex shrink-0 cursor-move touch-none select-none items-center justify-between border-b border-gray-200 bg-white px-4 py-3"
+        class="flex shrink-0 cursor-move touch-none select-none items-center justify-between border-b border-white/10 px-4 py-3"
         @pointerdown="startDrag"
       >
         <div class="flex items-center gap-2">
-          <UIcon name="i-lucide-sparkles" class="h-5 w-5 text-blue-600" />
-          <h2 class="font-semibold">AI Chat</h2>
+          <UIcon name="i-lucide-sparkles" class="h-5 w-5 text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.7)]" />
+          <h2 class="font-semibold text-gray-100">AI Chat</h2>
         </div>
         <button
           type="button"
           data-no-drag
           aria-label="Close"
-          class="text-gray-400 hover:text-gray-700"
+          class="text-gray-500 hover:text-gray-200"
           @click="toggle"
         >
           <UIcon name="i-lucide-x" class="h-5 w-5" />
@@ -229,11 +229,11 @@ async function send() {
           <!-- Day separator -->
           <div
             v-if="row.type === 'sep'"
-            class="my-1 flex items-center gap-3 text-xs text-gray-400"
+            class="my-1 flex items-center gap-3 text-xs text-gray-500"
           >
-            <span class="h-px flex-1 bg-gray-200" />
+            <span class="h-px flex-1 bg-white/10" />
             {{ row.label }}
-            <span class="h-px flex-1 bg-gray-200" />
+            <span class="h-px flex-1 bg-white/10" />
           </div>
 
           <!-- Message bubble -->
@@ -246,8 +246,8 @@ async function send() {
               class="max-w-[82%] rounded-2xl px-3 py-2"
               :class="
                 row.msg.role === 'user'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-800 shadow-sm'
+                  ? 'bg-gradient-to-br from-cyan-400 to-sky-500 text-[#04141c] glow-cyan'
+                  : 'neon-card text-gray-100'
               "
             >
               <p v-if="row.msg.content" class="whitespace-pre-wrap break-words">
@@ -258,15 +258,15 @@ async function send() {
                 <div
                   v-for="(item, j) in row.msg.items"
                   :key="j"
-                  class="rounded-xl bg-gray-50 p-3 text-sm text-gray-800"
+                  class="rounded-xl bg-black/20 p-3 text-sm text-gray-200"
                 >
                   <p class="font-medium">{{ item.food_name }}</p>
-                  <p class="text-gray-500">
+                  <p class="text-gray-400">
                     {{ item.grams ? `${item.grams} g · ` : "" }}{{ item.calories }} kcal
                     (P: {{ item.protein_g ?? 0 }} · F: {{ item.fat_g ?? 0 }} · C:
                     {{ item.carb_g ?? 0 }})
                   </p>
-                  <p v-if="item.assumption" class="mt-0.5 text-xs italic text-gray-400">
+                  <p v-if="item.assumption" class="mt-0.5 text-xs italic text-gray-500">
                     {{ item.assumption }}
                   </p>
                 </div>
@@ -274,7 +274,7 @@ async function send() {
 
               <p
                 class="mt-1 text-[10px] leading-none"
-                :class="row.msg.role === 'user' ? 'text-blue-100' : 'text-gray-400'"
+                :class="row.msg.role === 'user' ? 'text-[#04141c]/60' : 'text-gray-500'"
               >
                 {{ formatTime(row.msg.created_at) }}
               </p>
@@ -284,10 +284,10 @@ async function send() {
 
         <!-- Typing indicator -->
         <div v-if="loading" class="flex justify-start">
-          <div class="flex gap-1 rounded-2xl bg-white px-4 py-3 shadow-sm">
-            <span class="h-2 w-2 animate-bounce rounded-full bg-gray-300 [animation-delay:0ms]" />
-            <span class="h-2 w-2 animate-bounce rounded-full bg-gray-300 [animation-delay:150ms]" />
-            <span class="h-2 w-2 animate-bounce rounded-full bg-gray-300 [animation-delay:300ms]" />
+          <div class="neon-card flex gap-1 rounded-2xl px-4 py-3">
+            <span class="h-2 w-2 animate-bounce rounded-full bg-cyan-400/70 [animation-delay:0ms]" />
+            <span class="h-2 w-2 animate-bounce rounded-full bg-cyan-400/70 [animation-delay:150ms]" />
+            <span class="h-2 w-2 animate-bounce rounded-full bg-cyan-400/70 [animation-delay:300ms]" />
           </div>
         </div>
 
@@ -296,24 +296,24 @@ async function send() {
           v-if="!chatStore.messages.length && !loading"
           class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2 px-6 text-center"
         >
-          <UIcon name="i-lucide-message-square-text" class="h-10 w-10 text-gray-300" />
+          <UIcon name="i-lucide-message-square-text" class="h-10 w-10 text-gray-600" />
           <p class="text-sm text-gray-400">
             Describe what you ate — I'll count the calories and macros.
           </p>
-          <p class="text-xs text-gray-300">e.g. "ate 100 g of rice and a chicken breast"</p>
+          <p class="text-xs text-gray-600">e.g. "ate 100 g of rice and a chicken breast"</p>
         </div>
       </div>
 
       <!-- Prompt -->
-      <div class="shrink-0 border-t border-gray-200 bg-white px-3 pt-2 pb-3">
+      <div class="shrink-0 border-t border-white/10 px-3 pt-2 pb-3">
         <p
           v-if="anyError"
-          class="mb-2 flex items-center justify-between gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600"
+          class="mb-2 flex items-center justify-between gap-2 rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-300 ring-1 ring-rose-500/20"
         >
           <span>{{ anyError }}</span>
           <button
             type="button"
-            class="shrink-0 text-red-400 hover:text-red-600"
+            class="shrink-0 text-rose-400 hover:text-rose-300"
             @click="clearErrors"
           >
             <UIcon name="i-lucide-x" class="h-4 w-4" />
@@ -323,7 +323,7 @@ async function send() {
         <!-- Recording: live transcript (Web Speech) or waveform (Gemini) -->
         <div
           v-if="listening"
-          class="flex items-center gap-2 rounded-lg bg-red-50 px-2 py-2 ring-1 ring-red-200"
+          class="flex items-center gap-2 rounded-lg bg-rose-500/10 px-2 py-2 ring-1 ring-rose-500/30"
         >
           <UButton
             icon="i-lucide-x"
@@ -336,8 +336,8 @@ async function send() {
 
           <div class="flex min-h-[44px] min-w-0 flex-1 flex-col justify-center gap-1">
             <div v-if="voiceMode === 'speech'" class="flex items-center gap-2">
-              <span class="h-2 w-2 shrink-0 animate-pulse rounded-full bg-red-500" />
-              <p class="line-clamp-2 text-sm text-gray-700">
+              <span class="h-2 w-2 shrink-0 animate-pulse rounded-full bg-rose-400 shadow-[0_0_6px_rgba(251,113,133,0.9)]" />
+              <p class="line-clamp-2 text-sm text-gray-200">
                 {{ input || "Listening…" }}
               </p>
             </div>
@@ -347,7 +347,7 @@ async function send() {
                 <span
                   v-for="(lvl, i) in voiceLevels"
                   :key="i"
-                  class="w-[3px] rounded-full bg-red-500 transition-[height] duration-75"
+                  class="w-[3px] rounded-full bg-rose-400 shadow-[0_0_4px_rgba(251,113,133,0.8)] transition-[height] duration-75"
                   :style="{ height: `${Math.max(3, Math.round(lvl * 28))}px` }"
                 />
               </div>
@@ -368,7 +368,7 @@ async function send() {
         <!-- Transcribing -->
         <div
           v-else-if="transcribing"
-          class="flex h-[58px] items-center justify-center gap-2 rounded-lg bg-gray-100 text-sm text-gray-500"
+          class="flex h-[58px] items-center justify-center gap-2 rounded-lg bg-white/5 text-sm text-gray-400"
         >
           <UIcon name="i-lucide-loader-circle" class="h-4 w-4 animate-spin" />
           Transcribing…
@@ -377,6 +377,8 @@ async function send() {
         <UChatPrompt
           v-else
           v-model="input"
+          variant="naked"
+          class="neon-prompt"
           :placeholder="loading ? 'Processing…' : 'e.g. ate 100g of rice'"
           :autofocus="false"
           :maxrows="5"
@@ -419,7 +421,7 @@ async function send() {
         aria-label="Resize window"
         @pointerdown="startResize"
       >
-        <span class="absolute bottom-0 right-0 h-2.5 w-2.5 border-b-2 border-r-2 border-gray-400" />
+        <span class="absolute bottom-0 right-0 h-2.5 w-2.5 border-b-2 border-r-2 border-gray-600" />
       </div>
     </div>
   </Transition>
