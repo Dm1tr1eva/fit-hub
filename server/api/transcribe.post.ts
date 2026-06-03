@@ -23,9 +23,9 @@ export default defineEventHandler(async (event) => {
           parts: [
             {
               text:
-                "Расшифруй речь из этого аудио. Верни только распознанный текст " +
-                "на русском языке — без кавычек, пояснений и форматирования. " +
-                "Если речи нет, верни пустую строку.",
+                "Transcribe the speech in this audio. Return only the transcribed " +
+                "text in the language that is spoken — no quotes, comments, or " +
+                "formatting. If there is no speech, return an empty string.",
             },
             { inlineData: { mimeType: mimeType || "audio/wav", data: audio } },
           ],

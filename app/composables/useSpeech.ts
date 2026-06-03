@@ -146,7 +146,7 @@ export function useSpeech(opts: SpeechOptions = {}) {
       ctx.close().catch(() => {})
 
       if (audioBuffer.length < audioBuffer.sampleRate * 0.3) {
-        error.value = "Слишком короткая запись"
+        error.value = "Recording too short"
         return
       }
 
@@ -155,9 +155,9 @@ export function useSpeech(opts: SpeechOptions = {}) {
         body: { audio: toBase64(encodeWav(audioBuffer)), mimeType: "audio/wav" },
       })
       if (text) onResult?.(text)
-      else error.value = "Не удалось распознать речь, попробуйте ещё раз"
+      else error.value = "Couldn't recognize speech, try again"
     } catch {
-      error.value = "Не удалось распознать речь"
+      error.value = "Couldn't recognize speech"
     } finally {
       transcribing.value = false
     }
@@ -170,7 +170,7 @@ export function useSpeech(opts: SpeechOptions = {}) {
     const text = speechFinal.replace(/\s+/g, " ").trim()
     if (discarded) return
     if (text) onResult?.(text)
-    else error.value = "Не удалось распознать речь, попробуйте ещё раз"
+    else error.value = "Couldn't recognize speech, try again"
   }
 
   function startSpeech(): boolean {
@@ -199,7 +199,7 @@ export function useSpeech(opts: SpeechOptions = {}) {
         speechUnavailable = true
         networkFailed = true
       } else if (code === "not-allowed") {
-        error.value = "Нет доступа к микрофону. Разрешите его в настройках браузера."
+        error.value = "No microphone access. Allow it in your browser settings."
         discarded = true
       }
       // "no-speech" / "aborted" are benign
@@ -244,8 +244,8 @@ export function useSpeech(opts: SpeechOptions = {}) {
     } catch (e: any) {
       error.value =
         e?.name === "NotAllowedError"
-          ? "Нет доступа к микрофону. Разрешите его в настройках браузера."
-          : "Не удалось включить микрофон"
+          ? "No microphone access. Allow it in your browser settings."
+          : "Couldn't start the microphone"
       mode.value = null
       return
     }

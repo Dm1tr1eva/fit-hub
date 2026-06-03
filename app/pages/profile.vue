@@ -75,69 +75,69 @@ async function logout() {
 }
 
 const activityOptions = [
-  { value: "sedentary", label: "Сидячий" },
-  { value: "light", label: "Легкая активность" },
-  { value: "moderate", label: "Умеренная" },
-  { value: "active", label: "Активный" },
-  { value: "very_active", label: "Очень активный" },
+  { value: "sedentary", label: "Sedentary" },
+  { value: "light", label: "Lightly active" },
+  { value: "moderate", label: "Moderately active" },
+  { value: "active", label: "Active" },
+  { value: "very_active", label: "Very active" },
 ]
 
 const goalOptions = [
-  { value: "lose", label: "Похудение" },
-  { value: "maintain", label: "Поддержание" },
-  { value: "gain", label: "Набор массы" },
+  { value: "lose", label: "Lose weight" },
+  { value: "maintain", label: "Maintain" },
+  { value: "gain", label: "Gain weight" },
 ]
 </script>
 
 <template>
   <div class="p-4 max-w-md mx-auto space-y-6">
-    <h1 class="text-2xl font-bold">Профиль</h1>
+    <h1 class="text-2xl font-bold">Profile</h1>
 
     <form @submit.prevent="save" class="space-y-4">
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Имя</label>
+        <label class="block text-sm text-gray-600 mb-1">Name</label>
         <input v-model="form.name" class="w-full px-4 py-2 border border-gray-300 rounded-xl" />
       </div>
 
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Пол</label>
+        <label class="block text-sm text-gray-600 mb-1">Sex</label>
         <select v-model="form.sex" class="w-full px-4 py-2 border border-gray-300 rounded-xl">
-          <option value="male">Мужской</option>
-          <option value="female">Женский</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
         </select>
       </div>
 
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Возраст</label>
+        <label class="block text-sm text-gray-600 mb-1">Age</label>
         <input v-model.number="form.age" type="number" min="5" max="120" class="w-full px-4 py-2 border border-gray-300 rounded-xl" />
       </div>
 
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Рост (см)</label>
+        <label class="block text-sm text-gray-600 mb-1">Height (cm)</label>
         <input v-model.number="form.height_cm" type="number" min="50" max="260" class="w-full px-4 py-2 border border-gray-300 rounded-xl" />
       </div>
 
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Вес (кг)</label>
+        <label class="block text-sm text-gray-600 mb-1">Weight (kg)</label>
         <input v-model.number="form.weight_kg" type="number" min="20" max="400" step="0.1" class="w-full px-4 py-2 border border-gray-300 rounded-xl" />
       </div>
 
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Активность</label>
+        <label class="block text-sm text-gray-600 mb-1">Activity</label>
         <select v-model="form.activity_level" class="w-full px-4 py-2 border border-gray-300 rounded-xl">
           <option v-for="opt in activityOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
         </select>
       </div>
 
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Цель</label>
+        <label class="block text-sm text-gray-600 mb-1">Goal</label>
         <select v-model="form.goal" class="w-full px-4 py-2 border border-gray-300 rounded-xl">
           <option v-for="opt in goalOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
         </select>
       </div>
 
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Калории (оставьте пустым для авторасчета)</label>
+        <label class="block text-sm text-gray-600 mb-1">Calories (leave empty to auto-calculate)</label>
         <input
           v-model.number="form.daily_calorie_goal"
           type="number"
@@ -152,25 +152,25 @@ const goalOptions = [
         class="w-full bg-blue-600 text-white py-3 rounded-xl font-medium disabled:opacity-50"
         :disabled="saving"
       >
-        {{ saving ? "Сохранение..." : "Сохранить" }}
+        {{ saving ? "Saving..." : "Save" }}
       </button>
 
-      <p v-if="saved" class="text-green-600 text-sm text-center">Сохранено!</p>
+      <p v-if="saved" class="text-green-600 text-sm text-center">Saved!</p>
     </form>
 
     <div v-if="goals" class="bg-white rounded-2xl shadow-sm p-4 space-y-2">
-      <h2 class="font-semibold text-lg">Дневная цель</h2>
-      <p class="flex items-center gap-2"><UIcon name="i-lucide-flame"/> {{ goals.daily_calorie_goal }} ккал</p>
-      <p class="flex items-center gap-2"><UIcon name="i-lucide-beef"/> {{ goals.daily_protein_g }} г белка</p>
-      <p class="flex items-center gap-2"><UIcon name="i-lucide-hamburger"/> {{ goals.daily_fat_g }} г жиров</p>
-      <p class="flex items-center gap-2"><UIcon name="i-lucide-croissant"/> {{ goals.daily_carb_g }} г углеводов</p>
+      <h2 class="font-semibold text-lg">Daily goal</h2>
+      <p class="flex items-center gap-2"><UIcon name="i-lucide-flame"/> {{ goals.daily_calorie_goal }} kcal</p>
+      <p class="flex items-center gap-2"><UIcon name="i-lucide-beef"/> {{ goals.daily_protein_g }} g protein</p>
+      <p class="flex items-center gap-2"><UIcon name="i-lucide-hamburger"/> {{ goals.daily_fat_g }} g fat</p>
+      <p class="flex items-center gap-2"><UIcon name="i-lucide-croissant"/> {{ goals.daily_carb_g }} g carbs</p>
     </div>
 
     <button
       class="w-full bg-red-50 text-red-600 py-3 rounded-xl font-medium hover:bg-red-100 transition-colors"
       @click="logout"
     >
-      Выйти
+      Log out
     </button>
   </div>
 </template>

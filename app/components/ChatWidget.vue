@@ -64,9 +64,9 @@ const today = new Date()
 function dayLabel(d: Date): string {
   const yesterday = new Date(today)
   yesterday.setDate(today.getDate() - 1)
-  if (d.toDateString() === today.toDateString()) return "Сегодня"
-  if (d.toDateString() === yesterday.toDateString()) return "Вчера"
-  return d.toLocaleDateString("ru-RU", {
+  if (d.toDateString() === today.toDateString()) return "Today"
+  if (d.toDateString() === yesterday.toDateString()) return "Yesterday"
+  return d.toLocaleDateString("en-US", {
     day: "numeric",
     month: "long",
     ...(d.getFullYear() !== today.getFullYear() ? { year: "numeric" } : {}),
@@ -74,7 +74,7 @@ function dayLabel(d: Date): string {
 }
 
 function formatTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString("ru-RU", {
+  return new Date(iso).toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
   })
@@ -158,8 +158,8 @@ async function send() {
   } catch (e: any) {
     chatError.value =
       e?.status === 429
-        ? "Слишком частые запросы, попробуйте через минуту"
-        : "Ошибка при обработке запроса"
+        ? "Too many requests, try again in a minute"
+        : "Something went wrong"
   } finally {
     loading.value = false
   }
@@ -177,7 +177,7 @@ async function send() {
     <button
       v-if="!open"
       type="button"
-      aria-label="Открыть AI чат"
+      aria-label="Open AI chat"
       class="fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg transition-colors hover:bg-blue-700 active:scale-95"
       @click="toggle"
     >
@@ -207,12 +207,12 @@ async function send() {
       >
         <div class="flex items-center gap-2">
           <UIcon name="i-lucide-sparkles" class="h-5 w-5 text-blue-600" />
-          <h2 class="font-semibold">AI Чат</h2>
+          <h2 class="font-semibold">AI Chat</h2>
         </div>
         <button
           type="button"
           data-no-drag
-          aria-label="Закрыть"
+          aria-label="Close"
           class="text-gray-400 hover:text-gray-700"
           @click="toggle"
         >
@@ -262,8 +262,8 @@ async function send() {
                 >
                   <p class="font-medium">{{ item.food_name }}</p>
                   <p class="text-gray-500">
-                    {{ item.grams ? `${item.grams} г · ` : "" }}{{ item.calories }} ккал
-                    (Б: {{ item.protein_g ?? 0 }} · Ж: {{ item.fat_g ?? 0 }} · У:
+                    {{ item.grams ? `${item.grams} g · ` : "" }}{{ item.calories }} kcal
+                    (P: {{ item.protein_g ?? 0 }} · F: {{ item.fat_g ?? 0 }} · C:
                     {{ item.carb_g ?? 0 }})
                   </p>
                   <p v-if="item.assumption" class="mt-0.5 text-xs italic text-gray-400">
@@ -298,9 +298,9 @@ async function send() {
         >
           <UIcon name="i-lucide-message-square-text" class="h-10 w-10 text-gray-300" />
           <p class="text-sm text-gray-400">
-            Опишите, что вы съели — посчитаю калории и БЖУ.
+            Describe what you ate — I'll count the calories and macros.
           </p>
-          <p class="text-xs text-gray-300">Например: «съел 100 г риса и куриную грудку»</p>
+          <p class="text-xs text-gray-300">e.g. "ate 100 g of rice and a chicken breast"</p>
         </div>
       </div>
 
@@ -330,7 +330,7 @@ async function send() {
             color="neutral"
             variant="ghost"
             size="sm"
-            aria-label="Отменить запись"
+            aria-label="Cancel recording"
             @click="cancelVoice"
           />
 
@@ -338,7 +338,7 @@ async function send() {
             <div v-if="voiceMode === 'speech'" class="flex items-center gap-2">
               <span class="h-2 w-2 shrink-0 animate-pulse rounded-full bg-red-500" />
               <p class="line-clamp-2 text-sm text-gray-700">
-                {{ input || "Слушаю… говорите" }}
+                {{ input || "Listening…" }}
               </p>
             </div>
 
@@ -351,7 +351,7 @@ async function send() {
                   :style="{ height: `${Math.max(3, Math.round(lvl * 28))}px` }"
                 />
               </div>
-              <p class="text-xs text-gray-500">Говорите… нажмите ✓ когда закончите</p>
+              <p class="text-xs text-gray-500">Speak… tap ✓ when done</p>
             </template>
           </div>
 
@@ -360,7 +360,7 @@ async function send() {
             color="primary"
             variant="solid"
             size="sm"
-            aria-label="Готово"
+            aria-label="Done"
             @click="voiceStop"
           />
         </div>
@@ -371,13 +371,13 @@ async function send() {
           class="flex h-[58px] items-center justify-center gap-2 rounded-lg bg-gray-100 text-sm text-gray-500"
         >
           <UIcon name="i-lucide-loader-circle" class="h-4 w-4 animate-spin" />
-          Распознаю речь…
+          Transcribing…
         </div>
 
         <UChatPrompt
           v-else
           v-model="input"
-          :placeholder="loading ? 'Обрабатываю…' : 'Например: съел 100г риса'"
+          :placeholder="loading ? 'Processing…' : 'e.g. ate 100g of rice'"
           :autofocus="false"
           :maxrows="5"
           @submit="send"
@@ -391,7 +391,7 @@ async function send() {
                 variant="ghost"
                 size="sm"
                 :disabled="loading"
-                aria-label="Голосовой ввод"
+                aria-label="Voice input"
                 @click="startVoice"
               />
               <span v-else aria-hidden="true" />
@@ -416,7 +416,7 @@ async function send() {
       <!-- Resize handle (bottom-right corner) -->
       <div
         class="absolute bottom-1.5 right-1.5 z-20 h-4 w-4 cursor-nwse-resize touch-none"
-        aria-label="Изменить размер окна"
+        aria-label="Resize window"
         @pointerdown="startResize"
       >
         <span class="absolute bottom-0 right-0 h-2.5 w-2.5 border-b-2 border-r-2 border-gray-400" />

@@ -1,31 +1,51 @@
 <script setup lang="ts">
-const tabs = [
-  { name: "progress", label: "Прогресс", icon: "i-lucide-chart-no-axes-combined" },
-  { name: "profile", label: "Профиль", icon: "i-lucide-user-round" },
-];
+const favoritesOpen = useState<boolean>("favoritesOpen", () => false)
 </script>
 
 <template>
   <div class="min-h-screen bg-gray-50 flex flex-col">
-    <main class="flex-1 pb-16">
+    <main class="flex-1 pb-24">
       <slot />
     </main>
 
     <ChatWidget />
+    <FavoritesSheet />
 
     <nav
-      class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center h-16 safe-area-bottom"
+      class="fixed bottom-0 inset-x-0 z-30 h-16 border-t border-gray-200 bg-white safe-area-bottom"
     >
-      <NuxtLink
-        v-for="tab in tabs"
-        :key="tab.name"
-        :to="tab.name === 'progress' ? '/' : `/${tab.name}`"
-        class="flex flex-col items-center justify-center w-full h-full text-xs text-gray-500 hover:text-gray-900 transition-colors"
-        active-class="text-blue-600"
-      >
-        <UIcon :name="tab.icon" class="w-5 h-5" />
-        <span>{{ tab.label }}</span>
-      </NuxtLink>
+      <div class="mx-auto flex h-full max-w-md items-center justify-around px-4">
+        <!-- Favorites -->
+        <button
+          type="button"
+          class="flex w-16 flex-col items-center justify-center gap-0.5 text-xs transition-colors"
+          :class="favoritesOpen ? 'text-yellow-500' : 'text-gray-500 hover:text-gray-900'"
+          @click="favoritesOpen = !favoritesOpen"
+        >
+          <UIcon name="i-lucide-star" class="h-5 w-5" />
+          <span>Favorites</span>
+        </button>
+
+        <!-- Progress — raised primary "home" -->
+        <NuxtLink to="/" class="group -mt-8 flex w-16 flex-col items-center">
+          <span
+            class="flex h-16 w-16 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg ring-4 ring-gray-50 transition-transform group-active:scale-95"
+          >
+            <UIcon name="i-lucide-chart-no-axes-combined" class="h-7 w-7" />
+          </span>
+          <span class="mt-1 text-[11px] font-medium text-gray-600">Progress</span>
+        </NuxtLink>
+
+        <!-- Profile -->
+        <NuxtLink
+          to="/profile"
+          class="flex w-16 flex-col items-center justify-center gap-0.5 text-xs text-gray-500 transition-colors hover:text-gray-900"
+          active-class="text-blue-600"
+        >
+          <UIcon name="i-lucide-user-round" class="h-5 w-5" />
+          <span>Profile</span>
+        </NuxtLink>
+      </div>
     </nav>
   </div>
 </template>

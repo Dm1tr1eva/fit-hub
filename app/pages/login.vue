@@ -49,7 +49,7 @@ async function submit() {
 
   // Registration with email confirmation enabled returns a user but no session.
   if (isRegister.value && !data.session) {
-    error.value = "Проверьте почту для подтверждения регистрации"
+    error.value = "Check your email to confirm your registration"
     loading.value = false
     return
   }
@@ -69,7 +69,7 @@ function toggleMode() {
   <div class="min-h-screen flex items-center justify-center bg-gray-50 p-4">
     <div class="max-w-sm w-full bg-white rounded-2xl shadow-sm p-8">
       <h1 class="text-2xl font-bold text-center mb-2">Fit Hub</h1>
-      <p class="text-gray-500 text-center mb-6">Трекер калорий с AI</p>
+      <p class="text-gray-500 text-center mb-6">AI calorie tracker</p>
 
       <form @submit.prevent="submit" class="space-y-4">
         <input
@@ -82,7 +82,7 @@ function toggleMode() {
         <input
           v-model="password"
           type="password"
-          placeholder="Пароль"
+          placeholder="Password"
           class="w-full px-4 py-3 border border-gray-300 rounded-xl text-center"
           :disabled="loading"
         />
@@ -91,7 +91,7 @@ function toggleMode() {
           class="w-full bg-blue-600 text-white py-3 rounded-xl font-medium disabled:opacity-50"
           :disabled="loading || !email || !password"
         >
-          {{ loading ? "Загрузка..." : isRegister ? "Зарегистрироваться" : "Войти" }}
+          {{ loading ? "Loading..." : isRegister ? "Sign up" : "Sign in" }}
         </button>
       </form>
 
@@ -99,7 +99,7 @@ function toggleMode() {
 
       <p class="text-center mt-4 text-sm text-gray-500">
         <button class="text-blue-600 underline" @click="toggleMode">
-          {{ isRegister ? "Уже есть аккаунт? Войти" : "Нет аккаунта? Зарегистрироваться" }}
+          {{ isRegister ? "Already have an account? Sign in" : "No account? Sign up" }}
         </button>
       </p>
     </div>

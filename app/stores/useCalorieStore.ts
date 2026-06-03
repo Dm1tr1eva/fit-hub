@@ -12,6 +12,8 @@ export const useCalorieStore = defineStore("calories", () => {
   const dailyCarb = ref<number>(0)
   const todayMeals = ref<any[]>([])
   const weekData = ref<{ date: string; kcal: number }[]>([])
+  // Meals for a non-today day selected from the week chart.
+  const dayMeals = ref<any[]>([])
 
   // Whether each dataset has loaded at least once (for first-paint skeletons).
   const todayLoaded = ref(false)
@@ -98,6 +100,18 @@ export const useCalorieStore = defineStore("calories", () => {
     return weekInflight
   }
 
+  /** Load meals for a specific day (for browsing past days in the week chart). */
+  async function loadDay(userId: string, date: string) {
+    const client = useSupabaseClient()
+    const { data } = await client
+      .from("food_logs")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("log_date", date)
+      .order("created_at", { ascending: false })
+    dayMeals.value = data ?? []
+  }
+
   /** Refresh everything that can change after logging food. */
   function updateAfterChat(userId: string) {
     loadToday(userId)
@@ -112,10 +126,12 @@ export const useCalorieStore = defineStore("calories", () => {
     dailyCarb,
     todayMeals,
     weekData,
+    dayMeals,
     todayLoaded,
     weekLoaded,
     loadToday,
     loadWeek,
+    loadDay,
     updateAfterChat,
   }
 })

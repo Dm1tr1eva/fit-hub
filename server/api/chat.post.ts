@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
 
   const raw = result.text
     ? JSON.parse(result.text)
-    : { reply: "Не удалось распознать еду.", items: [] }
+    : { reply: "Sorry, I couldn't read that.", items: [] }
 
   const client = await getAuthedClient(event)
 
