@@ -1,7 +1,6 @@
 <script setup lang="ts">
 const tabs = [
   { name: "progress", label: "Прогресс", icon: "i-lucide-chart-no-axes-combined" },
-  { name: "chat", label: "Чат", icon: "i-lucide-message-square" },
   { name: "profile", label: "Профиль", icon: "i-lucide-user-round" },
 ];
 </script>
@@ -11,6 +10,8 @@ const tabs = [
     <main class="flex-1 pb-16">
       <slot />
     </main>
+
+    <ChatWidget />
 
     <nav
       class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center h-16 safe-area-bottom"
