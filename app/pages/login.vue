@@ -4,27 +4,59 @@ definePageMeta({
 })
 
 const supabase = useSupabaseClient()
+const user = useSupabaseUser()
 const email = ref("")
 const password = ref("")
 const loading = ref(false)
 const error = ref("")
 const isRegister = ref(false)
 
+// The supabase plugin sets the user asynchronously (onAuthStateChange →
+// getClaims), so right after sign-in `useSupabaseUser()` is still null. If we
+// navigate immediately the route middleware sees no user and bounces back to
+// /login — which is why it used to take two clicks. Wait for the user state
+// (the exact thing the middleware checks) before navigating.
+function waitForUser(timeout = 3000): Promise<void> {
+  if (user.value) return Promise.resolve()
+  return new Promise((resolve) => {
+    const stop = watch(user, (v) => {
+      if (v) {
+        stop()
+        clearTimeout(timer)
+        resolve()
+      }
+    })
+    const timer = setTimeout(() => {
+      stop()
+      resolve()
+    }, timeout)
+  })
+}
+
 async function submit() {
   loading.value = true
   error.value = ""
 
-  const fn = isRegister.value
+  const { data, error: err } = await (isRegister.value
     ? supabase.auth.signUp({ email: email.value, password: password.value })
-    : supabase.auth.signInWithPassword({ email: email.value, password: password.value })
+    : supabase.auth.signInWithPassword({ email: email.value, password: password.value }))
 
-  const { data, error: err } = await fn
   if (err) {
     error.value = err.message
-  } else if (data?.user) {
-    navigateTo("/")
+    loading.value = false
+    return
   }
+
+  // Registration with email confirmation enabled returns a user but no session.
+  if (isRegister.value && !data.session) {
+    error.value = "Проверьте почту для подтверждения регистрации"
+    loading.value = false
+    return
+  }
+
+  await waitForUser()
   loading.value = false
+  navigateTo("/")
 }
 
 function toggleMode() {
