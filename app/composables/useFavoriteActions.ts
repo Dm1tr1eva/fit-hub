@@ -1,4 +1,4 @@
-import type { FavoriteCard } from "~/stores/useFavoritesStore"
+import type { FavoriteCard, FavoriteValues } from "~/stores/useFavoritesStore"
 
 /**
  * Shared logic for the favorites surfaces (desktop rail + mobile sheet):
@@ -10,6 +10,9 @@ export function useFavoriteActions() {
   const calorieStore = useCalorieStore()
   const favoritesStore = useFavoritesStore()
 
+  // Error-only flash. Success is silent on purpose: the comet + the card
+  // appearing in the list already confirm the add, and a success line here
+  // would shift the list every time (it "jumps").
   const flash = ref("")
   let flashTimer: ReturnType<typeof setTimeout> | undefined
   function flashMsg(text: string) {
@@ -38,7 +41,6 @@ export function useFavoriteActions() {
       assumption: null,
       created_at: new Date().toISOString(),
     })
-    flashMsg(`Added: ${card.food_name}`)
 
     try {
       const row = await $fetch<any>("/api/food-log", {
@@ -70,7 +72,14 @@ export function useFavoriteActions() {
         fat_g: card.fat_g,
         carb_g: card.carb_g,
       })
-      flashMsg("Added to favorites")
+    } catch {
+      flashMsg("Couldn't save")
+    }
+  }
+
+  async function updateFavorite(id: string, values: FavoriteValues) {
+    try {
+      await favoritesStore.update(id, values)
     } catch {
       flashMsg("Couldn't save")
     }
@@ -85,5 +94,5 @@ export function useFavoriteActions() {
     }
   }
 
-  return { flash, cardKey, quickAdd, saveFavorite, removeFavorite }
+  return { flash, cardKey, quickAdd, saveFavorite, updateFavorite, removeFavorite }
 }

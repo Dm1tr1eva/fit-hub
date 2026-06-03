@@ -10,7 +10,7 @@ export type FavoriteCard = {
   count?: number
 }
 
-type FavoriteValues = {
+export type FavoriteValues = {
   food_name: string
   grams?: number | null
   calories: number
@@ -119,6 +119,16 @@ export const useFavoritesStore = defineStore("favorites", () => {
     return data
   }
 
+  async function update(id: string, values: FavoriteValues) {
+    const data = await $fetch<any>("/api/favorite", {
+      method: "PATCH",
+      body: { id, ...values },
+    })
+    const i = favorites.value.findIndex((f) => f.id === id)
+    if (i !== -1) favorites.value[i] = data
+    return data
+  }
+
   async function remove(id: string) {
     await $fetch("/api/favorite", { method: "DELETE", body: { id } })
     favorites.value = favorites.value.filter((f) => f.id !== id)
@@ -133,6 +143,7 @@ export const useFavoritesStore = defineStore("favorites", () => {
     loaded,
     loadAll,
     add,
+    update,
     remove,
   }
 })

@@ -29,10 +29,12 @@ const macroDetails = computed(() => {
 <template>
   <!-- Sticky so the ring + macros stay pinned and update live while scrolling.
        -mx-4 / -mt-4 assume this is the first child of the page's p-4 container. -->
-  <div class="sticky top-0 z-10 -mx-4 -mt-4 bg-[#0a0a0f] px-4 pt-4 pb-3">
+  <div class="sticky top-4 z-10 rounded-2xl bg-[#0a0a0f]">
     <div class="neon-card glow-cyan flex items-center gap-4 rounded-2xl p-4">
       <div id="calorie-ring" class="relative h-32 w-32 shrink-0">
-        <svg viewBox="0 0 128 128" class="h-32 w-32 -rotate-90">
+        <!-- overflow-visible so the progress arc's neon drop-shadow isn't
+             clipped by the SVG viewport (the ring nearly fills the box). -->
+        <svg viewBox="0 0 128 128" class="h-32 w-32 -rotate-90 overflow-visible">
           <circle cx="64" cy="64" :r="radius" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="10" />
           <circle
             cx="64" cy="64" :r="radius"

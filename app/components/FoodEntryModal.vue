@@ -45,11 +45,13 @@ function emptyForm(): Form {
 
 const form = ref<Form>(emptyForm())
 
-const isEdit = computed(() => props.kind === "log" && !!props.entry?.id)
+const isEdit = computed(() => !!props.entry?.id)
 
 const title = computed(() =>
   props.kind === "favorite"
-    ? "New card"
+    ? isEdit.value
+      ? "Edit card"
+      : "New card"
     : isEdit.value
       ? "Edit"
       : "Add product",

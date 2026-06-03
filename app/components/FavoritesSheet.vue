@@ -1,12 +1,30 @@
 <script setup lang="ts">
+import type { FavoriteCard as FavoriteCardType } from "~/stores/useFavoritesStore"
+
 // Shared with the bottom-nav "Favorites" button (mobile/tablet only).
 const open = useState<boolean>("favoritesOpen", () => false)
 
 const user = useSupabaseUser()
 const favoritesStore = useFavoritesStore()
-const { flash, cardKey, quickAdd, saveFavorite, removeFavorite } = useFavoriteActions()
+const { flash, cardKey, quickAdd, saveFavorite, updateFavorite, removeFavorite } =
+  useFavoriteActions()
 
-const createOpen = ref(false)
+// Same modal for create and edit: a null target means "new card".
+const modalOpen = ref(false)
+const editingCard = ref<FavoriteCardType | null>(null)
+
+function openCreate() {
+  editingCard.value = null
+  modalOpen.value = true
+}
+function openEdit(card: FavoriteCardType) {
+  editingCard.value = card
+  modalOpen.value = true
+}
+function onSubmit(values: any) {
+  if (editingCard.value?.id) updateFavorite(editingCard.value.id, values)
+  else saveFavorite(values)
+}
 
 // Two visually distinct sections; empty ones are dropped.
 const groups = computed(() =>
@@ -55,14 +73,14 @@ function close() {
               <div class="flex items-center gap-2">
                 <UIcon name="i-lucide-star" class="h-5 w-5 text-amber-300" />
                 <h2 class="font-semibold text-gray-200">Favorites</h2>
-                <span v-if="flash" class="text-xs font-medium text-emerald-400">{{ flash }}</span>
+                <span v-if="flash" class="text-xs font-medium text-rose-400">{{ flash }}</span>
               </div>
               <div class="flex items-center gap-1">
                 <button
                   type="button"
                   class="p-1 text-gray-500 hover:text-cyan-400"
                   aria-label="Create card"
-                  @click="createOpen = true"
+                  @click="openCreate"
                 >
                   <UIcon name="i-lucide-plus" class="h-5 w-5" />
                 </button>
@@ -86,24 +104,45 @@ function close() {
                   <div v-for="card in group.cards" :key="cardKey(card)" class="relative">
                     <button
                       type="button"
-                      class="neon-card neon-hover flex h-[72px] w-full flex-col justify-center rounded-xl p-3 text-left transition-colors"
+                      class="neon-card neon-hover flex min-h-[72px] w-full flex-col justify-center rounded-xl p-3 text-left transition-colors"
                       @click="quickAdd(card, $event.currentTarget)"
                     >
-                      <p class="truncate pr-4 text-sm font-medium text-gray-100">{{ card.food_name }}</p>
+                      <p
+                        class="truncate text-sm font-medium text-gray-100"
+                        :class="card.source === 'favorite' ? 'pr-12' : 'pr-4'"
+                      >
+                        {{ card.food_name }}
+                      </p>
                       <p class="truncate text-xs text-gray-500">
                         {{ card.calories }} kcal<template v-if="card.grams"> · {{ card.grams }}g</template>
                       </p>
+                      <p class="truncate text-[11px] text-gray-600">
+                        P {{ card.protein_g }} · F {{ card.fat_g }} · C {{ card.carb_g }}
+                      </p>
                     </button>
 
-                    <button
+                    <!-- Favourite → edit + remove; frequent suggestion → save. -->
+                    <div
                       v-if="card.source === 'favorite'"
-                      type="button"
-                      class="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-gray-400 hover:bg-rose-500/20 hover:text-rose-300"
-                      aria-label="Remove from favorites"
-                      @click="removeFavorite(card)"
+                      class="absolute right-1 top-1 flex items-center gap-1"
                     >
-                      <UIcon name="i-lucide-x" class="h-3 w-3" />
-                    </button>
+                      <button
+                        type="button"
+                        class="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-gray-400 hover:bg-cyan-500/20 hover:text-cyan-300"
+                        aria-label="Edit card"
+                        @click="openEdit(card)"
+                      >
+                        <UIcon name="i-lucide-pencil" class="h-3 w-3" />
+                      </button>
+                      <button
+                        type="button"
+                        class="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-gray-400 hover:bg-rose-500/20 hover:text-rose-300"
+                        aria-label="Remove from favorites"
+                        @click="removeFavorite(card)"
+                      >
+                        <UIcon name="i-lucide-x" class="h-3 w-3" />
+                      </button>
+                    </div>
                     <button
                       v-else
                       type="button"
@@ -127,10 +166,10 @@ function close() {
     </Transition>
 
     <FoodEntryModal
-      v-model:open="createOpen"
+      v-model:open="modalOpen"
       kind="favorite"
-      :entry="null"
-      @submit="saveFavorite"
+      :entry="editingCard"
+      @submit="onSubmit"
     />
   </Teleport>
 </template>

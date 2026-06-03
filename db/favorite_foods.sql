@@ -28,6 +28,10 @@ drop policy if exists "favorite_foods_insert_own" on public.favorite_foods;
 create policy "favorite_foods_insert_own" on public.favorite_foods
   for insert with check (auth.uid() = user_id);
 
+drop policy if exists "favorite_foods_update_own" on public.favorite_foods;
+create policy "favorite_foods_update_own" on public.favorite_foods
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
 drop policy if exists "favorite_foods_delete_own" on public.favorite_foods;
 create policy "favorite_foods_delete_own" on public.favorite_foods
   for delete using (auth.uid() = user_id);
