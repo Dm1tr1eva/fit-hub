@@ -48,11 +48,13 @@ export const useCalorieStore = defineStore("calories", () => {
 
       if (logsRes.data) {
         todayMeals.value = logsRes.data
+        // Round the sums — raw decimal macros otherwise produce float artifacts
+        // like 140.10000000000002.
         totals.value = {
-          kcal: logsRes.data.reduce((s: number, r: any) => s + (r.calories ?? 0), 0),
-          protein: logsRes.data.reduce((s: number, r: any) => s + (r.protein_g ?? 0), 0),
-          carb: logsRes.data.reduce((s: number, r: any) => s + (r.carb_g ?? 0), 0),
-          fat: logsRes.data.reduce((s: number, r: any) => s + (r.fat_g ?? 0), 0),
+          kcal: Math.round(logsRes.data.reduce((s: number, r: any) => s + (r.calories ?? 0), 0)),
+          protein: Math.round(logsRes.data.reduce((s: number, r: any) => s + (r.protein_g ?? 0), 0)),
+          carb: Math.round(logsRes.data.reduce((s: number, r: any) => s + (r.carb_g ?? 0), 0)),
+          fat: Math.round(logsRes.data.reduce((s: number, r: any) => s + (r.fat_g ?? 0), 0)),
         }
       }
       if (profileRes.data) {
