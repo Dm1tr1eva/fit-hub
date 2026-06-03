@@ -1,24 +1,20 @@
 <script setup lang="ts">
-import type { FavoriteCard } from "~/stores/useFavoritesStore"
-
-// Shared with the bottom-nav "Favorites" button.
+// Shared with the bottom-nav "Favorites" button (mobile/tablet only).
 const open = useState<boolean>("favoritesOpen", () => false)
 
 const user = useSupabaseUser()
 const favoritesStore = useFavoritesStore()
-const calorieStore = useCalorieStore()
+const { flash, cardKey, quickAdd, saveFavorite, removeFavorite } = useFavoriteActions()
 
 const createOpen = ref(false)
-const addingKey = ref<string | null>(null)
-const flash = ref("")
-let flashTimer: ReturnType<typeof setTimeout> | undefined
-function flashMsg(text: string) {
-  flash.value = text
-  clearTimeout(flashTimer)
-  flashTimer = setTimeout(() => (flash.value = ""), 1800)
-}
 
-const cardKey = (c: FavoriteCard) => c.id ?? c.food_name
+// Two visually distinct sections; empty ones are dropped.
+const groups = computed(() =>
+  [
+    { title: "Favorites", cards: favoritesStore.favoriteCards },
+    { title: "Recommended", cards: favoritesStore.recommendedCards },
+  ].filter((g) => g.cards.length),
+)
 
 // Refresh favorites/frequent whenever the sheet is opened.
 watch(open, (v) => {
@@ -28,74 +24,21 @@ watch(open, (v) => {
 function close() {
   open.value = false
 }
-
-async function quickAdd(card: FavoriteCard) {
-  if (addingKey.value) return
-  addingKey.value = cardKey(card)
-  try {
-    await $fetch("/api/food-log", {
-      method: "POST",
-      body: {
-        food_name: card.food_name,
-        grams: card.grams,
-        calories: card.calories,
-        protein_g: card.protein_g,
-        fat_g: card.fat_g,
-        carb_g: card.carb_g,
-      },
-    })
-    if (user.value?.sub) {
-      calorieStore.loadToday(user.value.sub)
-      calorieStore.loadWeek(user.value.sub)
-    }
-    flashMsg(`Added: ${card.food_name}`)
-  } catch {
-    flashMsg("Couldn't add")
-  } finally {
-    addingKey.value = null
-  }
-}
-
-async function saveFavorite(card: FavoriteCard) {
-  try {
-    await favoritesStore.add({
-      food_name: card.food_name,
-      grams: card.grams,
-      calories: card.calories,
-      protein_g: card.protein_g,
-      fat_g: card.fat_g,
-      carb_g: card.carb_g,
-    })
-    flashMsg("Added to favorites")
-  } catch {
-    flashMsg("Couldn't save")
-  }
-}
-
-async function removeFavorite(card: FavoriteCard) {
-  if (!card.id) return
-  try {
-    await favoritesStore.remove(card.id)
-  } catch {
-    flashMsg("Couldn't delete")
-  }
-}
-
-function onCreated() {
-  if (user.value?.sub) favoritesStore.loadAll(user.value.sub)
-}
 </script>
 
 <template>
   <Teleport to="body">
+    <!-- Half-height sheet + light backdrop so the calorie ring stays visible
+         (and the fly-to-ring animation reads). Mobile/tablet only — desktop
+         uses the always-visible FavoritesRail. -->
     <Transition
       enter-active-class="transition duration-200 ease-out"
       enter-from-class="opacity-0"
       leave-active-class="transition duration-150 ease-in"
       leave-to-class="opacity-0"
     >
-      <div v-if="open" class="fixed inset-0 z-50 flex items-end" @click.self="close">
-        <div class="absolute inset-0 bg-black/40" @click="close" />
+      <div v-if="open" class="fixed inset-0 z-40 flex items-end lg:hidden" @click.self="close">
+        <div class="absolute inset-0 bg-black/20" @click="close" />
 
         <Transition
           enter-active-class="transition duration-200 ease-out"
@@ -106,69 +49,75 @@ function onCreated() {
         >
           <div
             v-if="open"
-            class="relative mx-auto flex max-h-[75dvh] w-full max-w-md flex-col rounded-t-2xl bg-gray-50 shadow-2xl"
+            class="relative mx-auto flex max-h-[60dvh] w-full max-w-md flex-col rounded-t-2xl bg-gray-50 shadow-2xl"
           >
-            <header class="flex shrink-0 items-center justify-between border-b border-gray-200 bg-white rounded-t-2xl px-4 py-3">
+            <header class="flex shrink-0 items-center justify-between rounded-t-2xl border-b border-gray-200 bg-white px-4 py-3">
               <div class="flex items-center gap-2">
                 <UIcon name="i-lucide-star" class="h-5 w-5 text-yellow-500" />
                 <h2 class="font-semibold">Favorites</h2>
                 <span v-if="flash" class="text-xs font-medium text-green-600">{{ flash }}</span>
               </div>
-              <button
-                type="button"
-                class="text-gray-400 hover:text-gray-700"
-                aria-label="Close"
-                @click="close"
-              >
-                <UIcon name="i-lucide-x" class="h-5 w-5" />
-              </button>
-            </header>
-
-            <div class="min-h-0 flex-1 overflow-y-auto p-4">
-              <div class="grid grid-cols-2 gap-3">
+              <div class="flex items-center gap-1">
                 <button
-                  class="flex h-[72px] flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-gray-300 text-gray-400 hover:border-blue-400 hover:text-blue-500"
+                  type="button"
+                  class="p-1 text-gray-400 hover:text-blue-600"
+                  aria-label="Create card"
                   @click="createOpen = true"
                 >
                   <UIcon name="i-lucide-plus" class="h-5 w-5" />
-                  <span class="text-xs">Create</span>
                 </button>
-
-                <div v-for="card in favoritesStore.cards" :key="cardKey(card)" class="relative">
-                  <button
-                    class="flex h-[72px] w-full flex-col justify-center rounded-xl bg-white p-3 text-left shadow-sm transition-shadow hover:shadow disabled:opacity-50"
-                    :disabled="addingKey === cardKey(card)"
-                    @click="quickAdd(card)"
-                  >
-                    <p class="truncate pr-4 text-sm font-medium">{{ card.food_name }}</p>
-                    <p class="truncate text-xs text-gray-500">
-                      {{ card.calories }} kcal<template v-if="card.grams"> · {{ card.grams }}g</template>
-                    </p>
-                  </button>
-
-                  <button
-                    v-if="card.source === 'favorite'"
-                    class="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-red-100 hover:text-red-600"
-                    aria-label="Remove from favorites"
-                    @click.stop="removeFavorite(card)"
-                  >
-                    <UIcon name="i-lucide-x" class="h-3 w-3" />
-                  </button>
-                  <button
-                    v-else
-                    class="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gray-100 text-gray-400 hover:bg-yellow-100 hover:text-yellow-600"
-                    aria-label="Add to favorites"
-                    @click.stop="saveFavorite(card)"
-                  >
-                    <UIcon name="i-lucide-star" class="h-3 w-3" />
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  class="p-1 text-gray-400 hover:text-gray-700"
+                  aria-label="Close"
+                  @click="close"
+                >
+                  <UIcon name="i-lucide-x" class="h-5 w-5" />
+                </button>
               </div>
+            </header>
 
-              <p
-                v-if="favoritesStore.cards.length === 0"
-                class="mt-4 text-center text-sm text-gray-400"
-              >
+            <div class="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
+              <section v-for="group in groups" :key="group.title">
+                <p class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                  {{ group.title }}
+                </p>
+                <div class="grid grid-cols-2 gap-3">
+                  <div v-for="card in group.cards" :key="cardKey(card)" class="relative">
+                    <button
+                      type="button"
+                      class="flex h-[72px] w-full flex-col justify-center rounded-xl bg-white p-3 text-left shadow-sm transition-shadow hover:shadow"
+                      @click="quickAdd(card, $event.currentTarget)"
+                    >
+                      <p class="truncate pr-4 text-sm font-medium">{{ card.food_name }}</p>
+                      <p class="truncate text-xs text-gray-500">
+                        {{ card.calories }} kcal<template v-if="card.grams"> · {{ card.grams }}g</template>
+                      </p>
+                    </button>
+
+                    <button
+                      v-if="card.source === 'favorite'"
+                      type="button"
+                      class="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-red-100 hover:text-red-600"
+                      aria-label="Remove from favorites"
+                      @click="removeFavorite(card)"
+                    >
+                      <UIcon name="i-lucide-x" class="h-3 w-3" />
+                    </button>
+                    <button
+                      v-else
+                      type="button"
+                      class="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gray-100 text-gray-400 hover:bg-yellow-100 hover:text-yellow-600"
+                      aria-label="Save to favorites"
+                      @click="saveFavorite(card)"
+                    >
+                      <UIcon name="i-lucide-star" class="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              </section>
+
+              <p v-if="!groups.length" class="text-center text-sm text-gray-400">
                 Empty for now. Create a card or star ⭐ a meal from your log.
               </p>
             </div>
@@ -181,7 +130,7 @@ function onCreated() {
       v-model:open="createOpen"
       kind="favorite"
       :entry="null"
-      @saved="onCreated"
+      @submit="saveFavorite"
     />
   </Teleport>
 </template>

@@ -27,9 +27,9 @@ export const useFavoritesStore = defineStore("favorites", () => {
   const loaded = ref(false)
   let inflight: Promise<void> | null = null
 
-  /** Explicit favorites first, then frequent suggestions not already favorited. */
-  const cards = computed<FavoriteCard[]>(() => {
-    const fav: FavoriteCard[] = favorites.value.map((f) => ({
+  /** Manually-added favorites. */
+  const favoriteCards = computed<FavoriteCard[]>(() =>
+    favorites.value.map((f) => ({
       id: f.id,
       food_name: f.food_name,
       grams: f.grams ?? null,
@@ -38,11 +38,19 @@ export const useFavoritesStore = defineStore("favorites", () => {
       fat_g: f.fat_g ?? 0,
       carb_g: f.carb_g ?? 0,
       source: "favorite",
-    }))
-    const taken = new Set(fav.map((f) => f.food_name.toLowerCase()))
-    const freq = frequent.value.filter((f) => !taken.has(f.food_name.toLowerCase()))
-    return [...fav, ...freq]
+    })),
+  )
+
+  /** Auto-suggested frequent foods not already in favorites. */
+  const recommendedCards = computed<FavoriteCard[]>(() => {
+    const taken = new Set(favoriteCards.value.map((c) => c.food_name.toLowerCase()))
+    return frequent.value.filter((c) => !taken.has(c.food_name.toLowerCase()))
   })
+
+  const cards = computed<FavoriteCard[]>(() => [
+    ...favoriteCards.value,
+    ...recommendedCards.value,
+  ])
 
   async function loadAll(userId: string) {
     if (inflight) return inflight
@@ -116,5 +124,15 @@ export const useFavoritesStore = defineStore("favorites", () => {
     favorites.value = favorites.value.filter((f) => f.id !== id)
   }
 
-  return { favorites, frequent, cards, loaded, loadAll, add, remove }
+  return {
+    favorites,
+    frequent,
+    cards,
+    favoriteCards,
+    recommendedCards,
+    loaded,
+    loadAll,
+    add,
+    remove,
+  }
 })

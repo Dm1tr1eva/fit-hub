@@ -8,6 +8,7 @@ const user = useSupabaseUser()
 
 const isToday = computed(() => props.date === todayKey())
 const selectedMeals = computed(() => (isToday.value ? store.todayMeals : store.dayMeals))
+const scope = computed<"today" | "day">(() => (isToday.value ? "today" : "day"))
 
 // Load a past day's meals when the selection changes (today is already loaded).
 watch(
@@ -26,9 +27,16 @@ function refreshSelected() {
 }
 
 async function deleteMeal(id: string) {
-  const supabase = useSupabaseClient()
-  await supabase.from("food_logs").delete().eq("id", id)
-  refreshSelected()
+  store.removeLocalMeal(id, scope.value) // optimistic
+  try {
+    const supabase = useSupabaseClient()
+    const { error } = await supabase.from("food_logs").delete().eq("id", id)
+    if (error) throw error
+    if (user.value?.sub) store.loadWeek(user.value.sub)
+  } catch {
+    refreshSelected() // rollback by reloading
+    flashMsg("Couldn't delete")
+  }
 }
 
 // Add / edit modal
@@ -43,6 +51,41 @@ function openAdd() {
 function openEdit(meal: any) {
   editingEntry.value = meal
   modalOpen.value = true
+}
+
+// Modal emits form values; persist optimistically. Manual add goes to "today"
+// (the Add button only shows on today); edit stays on the viewed day.
+function onSubmit(values: any) {
+  if (editingEntry.value?.id) editEntry(editingEntry.value.id, values)
+  else addEntry(values)
+}
+
+async function addEntry(values: any) {
+  const tempId = `temp-${crypto.randomUUID()}`
+  store.addLocalMeal(
+    { id: tempId, log_date: todayKey(), assumption: null, created_at: new Date().toISOString(), ...values },
+    "today",
+  )
+  try {
+    const row = await $fetch<any>("/api/food-log", { method: "POST", body: values })
+    store.replaceLocalMeal(tempId, row, "today")
+    if (user.value?.sub) store.loadWeek(user.value.sub)
+  } catch {
+    store.removeLocalMeal(tempId, "today")
+    flashMsg("Couldn't add")
+  }
+}
+
+async function editEntry(id: string, values: any) {
+  const sc = scope.value
+  store.updateLocalMeal(id, values, sc)
+  try {
+    await $fetch("/api/food-log", { method: "PATCH", body: { id, ...values } })
+    if (user.value?.sub) store.loadWeek(user.value.sub)
+  } catch {
+    refreshSelected()
+    flashMsg("Couldn't save")
+  }
 }
 
 // Star a meal into favorites
@@ -151,6 +194,6 @@ async function favoriteMeal(meal: any) {
       </div>
     </div>
 
-    <FoodEntryModal v-model:open="modalOpen" :entry="editingEntry" @saved="refreshSelected" />
+    <FoodEntryModal v-model:open="modalOpen" :entry="editingEntry" @submit="onSubmit" />
   </div>
 </template>

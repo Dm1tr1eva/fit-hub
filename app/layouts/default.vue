@@ -10,15 +10,16 @@ const favoritesOpen = useState<boolean>("favoritesOpen", () => false)
 
     <ChatWidget />
     <FavoritesSheet />
+    <FavoritesRail />
 
     <nav
       class="fixed bottom-0 inset-x-0 z-30 h-16 border-t border-gray-200 bg-white safe-area-bottom"
     >
       <div class="mx-auto flex h-full max-w-md items-center justify-around px-4">
-        <!-- Favorites -->
+        <!-- Favorites (hidden on desktop — the always-on FavoritesRail replaces it) -->
         <button
           type="button"
-          class="flex w-16 flex-col items-center justify-center gap-0.5 text-xs transition-colors"
+          class="flex w-16 flex-col items-center justify-center gap-0.5 text-xs transition-colors lg:invisible"
           :class="favoritesOpen ? 'text-yellow-500' : 'text-gray-500 hover:text-gray-900'"
           @click="favoritesOpen = !favoritesOpen"
         >

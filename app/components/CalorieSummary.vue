@@ -31,7 +31,7 @@ const macroDetails = computed(() => {
        -mx-4 / -mt-4 assume this is the first child of the page's p-4 container. -->
   <div class="sticky top-0 z-10 -mx-4 -mt-4 bg-gray-50 px-4 pt-4 pb-3">
     <div class="flex items-center gap-4 rounded-2xl bg-white p-4 shadow-sm">
-      <div class="relative h-32 w-32 shrink-0">
+      <div id="calorie-ring" class="relative h-32 w-32 shrink-0">
         <svg viewBox="0 0 128 128" class="h-32 w-32 -rotate-90">
           <circle cx="64" cy="64" :r="radius" fill="none" stroke="#e5e7eb" stroke-width="10" />
           <circle

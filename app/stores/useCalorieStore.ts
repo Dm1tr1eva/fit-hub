@@ -1,11 +1,4 @@
 export const useCalorieStore = defineStore("calories", () => {
-  const totals = ref<{
-    kcal: number
-    protein: number
-    carb: number
-    fat: number
-  } | null>(null)
-
   const dailyGoal = ref<number | null>(null)
   const dailyProtein = ref<number>(0)
   const dailyFat = ref<number>(0)
@@ -14,6 +7,15 @@ export const useCalorieStore = defineStore("calories", () => {
   const weekData = ref<{ date: string; kcal: number }[]>([])
   // Meals for a non-today day selected from the week chart.
   const dayMeals = ref<any[]>([])
+
+  // Derived from todayMeals so optimistic add/remove updates the ring instantly.
+  // Sums are rounded to avoid float artifacts (e.g. 140.10000000000002).
+  const totals = computed(() => ({
+    kcal: Math.round(todayMeals.value.reduce((s: number, r: any) => s + (r.calories ?? 0), 0)),
+    protein: Math.round(todayMeals.value.reduce((s: number, r: any) => s + (r.protein_g ?? 0), 0)),
+    carb: Math.round(todayMeals.value.reduce((s: number, r: any) => s + (r.carb_g ?? 0), 0)),
+    fat: Math.round(todayMeals.value.reduce((s: number, r: any) => s + (r.fat_g ?? 0), 0)),
+  }))
 
   // Whether each dataset has loaded at least once (for first-paint skeletons).
   const todayLoaded = ref(false)
@@ -48,14 +50,6 @@ export const useCalorieStore = defineStore("calories", () => {
 
       if (logsRes.data) {
         todayMeals.value = logsRes.data
-        // Round the sums — raw decimal macros otherwise produce float artifacts
-        // like 140.10000000000002.
-        totals.value = {
-          kcal: Math.round(logsRes.data.reduce((s: number, r: any) => s + (r.calories ?? 0), 0)),
-          protein: Math.round(logsRes.data.reduce((s: number, r: any) => s + (r.protein_g ?? 0), 0)),
-          carb: Math.round(logsRes.data.reduce((s: number, r: any) => s + (r.carb_g ?? 0), 0)),
-          fat: Math.round(logsRes.data.reduce((s: number, r: any) => s + (r.fat_g ?? 0), 0)),
-        }
       }
       if (profileRes.data) {
         dailyGoal.value = profileRes.data.daily_calorie_goal
@@ -114,6 +108,31 @@ export const useCalorieStore = defineStore("calories", () => {
     dayMeals.value = data ?? []
   }
 
+  // --- Optimistic local mutations (instant UI; server sync happens separately) ---
+  // scope: "today" mutates todayMeals (also drives the ring); "day" mutates the
+  // browsed past-day list.
+  type Scope = "today" | "day"
+  const scoped = (s: Scope) => (s === "today" ? todayMeals : dayMeals)
+
+  function addLocalMeal(meal: any, scope: Scope = "today") {
+    const a = scoped(scope)
+    a.value = [meal, ...a.value]
+  }
+  function replaceLocalMeal(tempId: string, row: any, scope: Scope = "today") {
+    const a = scoped(scope)
+    const i = a.value.findIndex((m) => m.id === tempId)
+    if (i !== -1) a.value[i] = row
+  }
+  function removeLocalMeal(id: string, scope: Scope = "today") {
+    const a = scoped(scope)
+    a.value = a.value.filter((m) => m.id !== id)
+  }
+  function updateLocalMeal(id: string, patch: any, scope: Scope = "today") {
+    const a = scoped(scope)
+    const i = a.value.findIndex((m) => m.id === id)
+    if (i !== -1) a.value[i] = { ...a.value[i], ...patch }
+  }
+
   /** Refresh everything that can change after logging food. */
   function updateAfterChat(userId: string) {
     loadToday(userId)
@@ -134,6 +153,10 @@ export const useCalorieStore = defineStore("calories", () => {
     loadToday,
     loadWeek,
     loadDay,
+    addLocalMeal,
+    replaceLocalMeal,
+    removeLocalMeal,
+    updateLocalMeal,
     updateAfterChat,
   }
 })

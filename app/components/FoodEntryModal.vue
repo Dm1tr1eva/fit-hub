@@ -20,7 +20,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   "update:open": [boolean]
-  saved: []
+  submit: [Form]
 }>()
 
 type Form = {
@@ -44,8 +44,6 @@ function emptyForm(): Form {
 }
 
 const form = ref<Form>(emptyForm())
-const saving = ref(false)
-const error = ref("")
 
 const isEdit = computed(() => props.kind === "log" && !!props.entry?.id)
 
@@ -61,7 +59,6 @@ watch(
   () => props.open,
   (open) => {
     if (!open) return
-    error.value = ""
     const e = props.entry
     form.value = e
       ? {
@@ -84,29 +81,15 @@ const canSave = computed(
 )
 
 function close() {
-  if (!saving.value) emit("update:open", false)
+  emit("update:open", false)
 }
 
-async function save() {
-  if (!canSave.value || saving.value) return
-  saving.value = true
-  error.value = ""
-  try {
-    if (props.kind === "favorite") {
-      await $fetch("/api/favorite", { method: "POST", body: { ...form.value } })
-    } else {
-      await $fetch("/api/food-log", {
-        method: isEdit.value ? "PATCH" : "POST",
-        body: isEdit.value ? { id: props.entry!.id, ...form.value } : { ...form.value },
-      })
-    }
-    emit("saved")
-    emit("update:open", false)
-  } catch (e: any) {
-    error.value = e?.data?.message || "Couldn't save"
-  } finally {
-    saving.value = false
-  }
+// Closes immediately and hands the values to the parent, which persists them
+// optimistically (and rolls back on failure).
+function save() {
+  if (!canSave.value) return
+  emit("submit", { ...form.value })
+  emit("update:open", false)
 }
 </script>
 
@@ -214,8 +197,6 @@ async function save() {
                 </div>
               </div>
 
-              <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
-
               <div class="flex gap-2 pt-2">
                 <button
                   type="button"
@@ -227,9 +208,9 @@ async function save() {
                 <button
                   type="submit"
                   class="flex-1 rounded-xl bg-blue-600 py-3 font-medium text-white disabled:opacity-50"
-                  :disabled="!canSave || saving"
+                  :disabled="!canSave"
                 >
-                  {{ saving ? "Saving..." : "Save" }}
+                  Save
                 </button>
               </div>
             </form>
