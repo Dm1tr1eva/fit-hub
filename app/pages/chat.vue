@@ -1,23 +1,8 @@
 <script setup lang="ts">
+import type { ChatRow, FoodItem } from "~/stores/useChatStore"
+
 const user = useSupabaseUser()
-
-type FoodItem = {
-  food_name: string
-  grams?: number | null
-  calories: number
-  protein_g?: number
-  fat_g?: number
-  carb_g?: number
-  assumption?: string | null
-}
-
-type ChatMessage = {
-  id: string
-  role: "user" | "assistant"
-  content: string
-  parts: { type: "text"; text: string }[]
-  items?: FoodItem[]
-}
+const chatStore = useChatStore()
 
 type ChatResponse = {
   reply: string
@@ -25,13 +10,10 @@ type ChatResponse = {
   totals?: unknown
 }
 
-const messages = ref<ChatMessage[]>([])
 const input = ref("")
 const loading = ref(false)
 const chatError = ref("")
-
-let seq = 0
-const nextId = () => `${Date.now()}-${seq++}`
+const scrollEl = ref<HTMLElement | null>(null)
 
 const {
   supported: voiceSupported,
@@ -72,19 +54,74 @@ function cancelVoice() {
   input.value = ""
 }
 
+// ---- history rendering: day separators + per-message time ----
+const today = new Date()
+
+function dayLabel(d: Date): string {
+  const yesterday = new Date(today)
+  yesterday.setDate(today.getDate() - 1)
+  if (d.toDateString() === today.toDateString()) return "Сегодня"
+  if (d.toDateString() === yesterday.toDateString()) return "Вчера"
+  return d.toLocaleDateString("ru-RU", {
+    day: "numeric",
+    month: "long",
+    ...(d.getFullYear() !== today.getFullYear() ? { year: "numeric" } : {}),
+  })
+}
+
+function formatTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString("ru-RU", {
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+}
+
+type RenderItem =
+  | { type: "sep"; id: string; label: string }
+  | { type: "msg"; id: string; msg: ChatRow }
+
+const rendered = computed<RenderItem[]>(() => {
+  const out: RenderItem[] = []
+  let lastDay = ""
+  for (const m of chatStore.messages) {
+    const d = new Date(m.created_at)
+    const key = d.toDateString()
+    if (key !== lastDay) {
+      out.push({ type: "sep", id: `sep-${key}`, label: dayLabel(d) })
+      lastDay = key
+    }
+    out.push({ type: "msg", id: m.id, msg: m })
+  }
+  return out
+})
+
+function scrollToBottom() {
+  const el = scrollEl.value
+  if (el) el.scrollTop = el.scrollHeight
+}
+const scrollSoon = () => nextTick(scrollToBottom)
+
+onMounted(async () => {
+  if (user.value?.sub) await chatStore.loadHistory(user.value.sub)
+  scrollSoon()
+})
+
 async function send() {
   const msg = input.value.trim()
   if (!msg || loading.value) return
 
-  messages.value.push({
-    id: nextId(),
+  const now = Date.now()
+  chatStore.append({
+    id: `local-${now}`,
     role: "user",
     content: msg,
-    parts: [{ type: "text", text: msg }],
+    items: null,
+    created_at: new Date(now).toISOString(),
   })
   input.value = ""
   loading.value = true
   chatError.value = ""
+  scrollSoon()
 
   try {
     const data = await $fetch<ChatResponse>("/api/chat", {
@@ -92,18 +129,16 @@ async function send() {
       body: { message: msg },
     })
 
-    if (user.value?.sub) {
-      const store = useCalorieStore()
-      store.updateAfterChat(user.value.sub)
-    }
+    if (user.value?.sub) useCalorieStore().updateAfterChat(user.value.sub)
 
-    messages.value.push({
-      id: nextId(),
+    chatStore.append({
+      id: `local-${Date.now()}`,
       role: "assistant",
       content: data.reply,
-      parts: [{ type: "text", text: data.reply }],
-      items: data.items,
+      items: data.items?.length ? data.items : null,
+      created_at: new Date().toISOString(),
     })
+    scrollSoon()
   } catch (e: any) {
     chatError.value =
       e?.status === 429
@@ -123,43 +158,80 @@ async function send() {
       <h1 class="text-2xl font-bold">AI Чат</h1>
     </header>
 
-    <!-- Scroll container. UChatMessages anchors its auto-scroll / spacing to
-         this element, so it must be the one that scrolls (flex-1 + min-h-0). -->
-    <div class="relative flex min-h-0 flex-1 flex-col overflow-y-auto px-2">
-      <UChatMessages
-        :messages="messages"
-        :status="loading ? 'submitted' : 'ready'"
-        should-auto-scroll
-        should-scroll-to-bottom
-        :user="{ side: 'right', variant: 'soft' }"
-        :assistant="{ side: 'left', variant: 'naked' }"
-      >
-        <template #content="{ message }">
-          <p class="whitespace-pre-wrap break-words">{{ message.content }}</p>
+    <!-- Scrollable conversation -->
+    <div
+      ref="scrollEl"
+      class="relative flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-3 py-2"
+    >
+      <template v-for="row in rendered" :key="row.id">
+        <!-- Day separator -->
+        <div
+          v-if="row.type === 'sep'"
+          class="my-1 flex items-center gap-3 text-xs text-gray-400"
+        >
+          <span class="h-px flex-1 bg-gray-200" />
+          {{ row.label }}
+          <span class="h-px flex-1 bg-gray-200" />
+        </div>
 
-          <div v-if="message.items?.length" class="mt-2 space-y-2">
-            <div
-              v-for="(item, j) in message.items"
-              :key="j"
-              class="rounded-xl bg-white p-3 text-sm shadow-sm"
-            >
-              <p class="font-medium">{{ item.food_name }}</p>
-              <p class="text-gray-500">
-                {{ item.grams ? `${item.grams} г · ` : "" }}{{ item.calories }} ккал
-                (Б: {{ item.protein_g ?? 0 }} · Ж: {{ item.fat_g ?? 0 }} · У:
-                {{ item.carb_g ?? 0 }})
-              </p>
-              <p v-if="item.assumption" class="mt-0.5 text-xs italic text-gray-400">
-                {{ item.assumption }}
-              </p>
+        <!-- Message bubble -->
+        <div
+          v-else
+          class="flex"
+          :class="row.msg.role === 'user' ? 'justify-end' : 'justify-start'"
+        >
+          <div
+            class="max-w-[82%] rounded-2xl px-3 py-2"
+            :class="
+              row.msg.role === 'user'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-800 shadow-sm'
+            "
+          >
+            <p v-if="row.msg.content" class="whitespace-pre-wrap break-words">
+              {{ row.msg.content }}
+            </p>
+
+            <div v-if="row.msg.items?.length" class="mt-2 space-y-2">
+              <div
+                v-for="(item, j) in row.msg.items"
+                :key="j"
+                class="rounded-xl bg-gray-50 p-3 text-sm text-gray-800"
+              >
+                <p class="font-medium">{{ item.food_name }}</p>
+                <p class="text-gray-500">
+                  {{ item.grams ? `${item.grams} г · ` : "" }}{{ item.calories }} ккал
+                  (Б: {{ item.protein_g ?? 0 }} · Ж: {{ item.fat_g ?? 0 }} · У:
+                  {{ item.carb_g ?? 0 }})
+                </p>
+                <p v-if="item.assumption" class="mt-0.5 text-xs italic text-gray-400">
+                  {{ item.assumption }}
+                </p>
+              </div>
             </div>
-          </div>
-        </template>
-      </UChatMessages>
 
-      <!-- Empty state, overlaid on the (empty) messages area -->
+            <p
+              class="mt-1 text-[10px] leading-none"
+              :class="row.msg.role === 'user' ? 'text-blue-100' : 'text-gray-400'"
+            >
+              {{ formatTime(row.msg.created_at) }}
+            </p>
+          </div>
+        </div>
+      </template>
+
+      <!-- Typing indicator -->
+      <div v-if="loading" class="flex justify-start">
+        <div class="flex gap-1 rounded-2xl bg-white px-4 py-3 shadow-sm">
+          <span class="h-2 w-2 animate-bounce rounded-full bg-gray-300 [animation-delay:0ms]" />
+          <span class="h-2 w-2 animate-bounce rounded-full bg-gray-300 [animation-delay:150ms]" />
+          <span class="h-2 w-2 animate-bounce rounded-full bg-gray-300 [animation-delay:300ms]" />
+        </div>
+      </div>
+
+      <!-- Empty state -->
       <div
-        v-if="messages.length === 0 && !loading"
+        v-if="!chatStore.messages.length && !loading"
         class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2 px-6 text-center"
       >
         <UIcon name="i-lucide-message-square-text" class="h-10 w-10 text-gray-300" />

@@ -27,8 +27,10 @@ export default defineEventHandler(async (event) => {
     ? JSON.parse(result.text)
     : { reply: "Не удалось распознать еду.", items: [] }
 
+  const client = await getAuthedClient(event)
+
+  let totals = null
   if (raw.items?.length > 0) {
-    const client = await getAuthedClient(event)
     const profile = await client
       .from("profiles")
       .select("timezone")
@@ -53,9 +55,28 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    const totals = await getTodayTotals(client, user.id, today)
-    return { reply: raw.reply, items: raw.items, totals }
+    totals = await getTodayTotals(client, user.id, today)
   }
 
-  return { reply: raw.reply, items: [], totals: null }
+  // Persist the conversation (both sides, including non-food messages). The 1ms
+  // offset keeps the assistant reply sorting after the user message.
+  const ts = Date.now()
+  await client.from("chat_messages").insert([
+    {
+      user_id: user.id,
+      role: "user",
+      content: message,
+      items: null,
+      created_at: new Date(ts).toISOString(),
+    },
+    {
+      user_id: user.id,
+      role: "assistant",
+      content: raw.reply,
+      items: raw.items?.length ? raw.items : null,
+      created_at: new Date(ts + 1).toISOString(),
+    },
+  ])
+
+  return { reply: raw.reply, items: raw.items ?? [], totals }
 })
