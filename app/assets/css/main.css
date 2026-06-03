@@ -194,6 +194,39 @@ body {
   }
 }
 
+/* ---- Favorites grid (TransitionGroup name="fav") -------------------- */
+/* Grid-safe variant (no absolute leave): a card glows in, fades/shrinks out.
+   Used by the mobile sheet's 2-col grid where absolute positioning would
+   break the layout. */
+.fav-enter-active {
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+  animation: meal-glow 0.9s ease-out 0.05s;
+}
+.fav-enter-from {
+  opacity: 0;
+  transform: scale(0.9);
+}
+.fav-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.fav-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
+.fav-move {
+  transition: transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .fav-enter-active,
+  .fav-leave-active,
+  .fav-move {
+    transition: none;
+    animation: none;
+  }
+}
+
 /* ---- Scrollbars: thin, dark, cyan on hover -------------------------- */
 * {
   scrollbar-width: thin;

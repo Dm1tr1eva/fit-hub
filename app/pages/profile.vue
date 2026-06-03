@@ -74,6 +74,25 @@ async function logout() {
   navigateTo("/login")
 }
 
+const sexOptions = [
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" },
+]
+
+// Make USelect match the .neon-input text fields: 42px tall, 16px text inset
+// (ps-4), chevron given the same inset (pe-4) instead of being jammed to the
+// edge. `md:text-base` overrides the size's responsive `md:text-sm` (which
+// otherwise shrank the line-height → 38px). The dropdown gets a dark surface
+// (the default bg-default ≈ zinc-900 reads "light" against our near-black) and
+// a cyan highlight on the hovered item.
+const selectUi = {
+  base: "rounded-xl ps-4 pe-10 py-2 text-base md:text-base min-h-[42px]",
+  trailing: "pe-4",
+  content: "bg-[#101019] ring-white/10 rounded-xl",
+  item:
+    "rounded-lg data-highlighted:not-data-disabled:before:bg-cyan-500/25 data-highlighted:not-data-disabled:text-white",
+}
+
 const activityOptions = [
   { value: "sedentary", label: "Sedentary" },
   { value: "light", label: "Lightly active" },
@@ -101,10 +120,7 @@ const goalOptions = [
 
       <div>
         <label class="block text-sm text-gray-400 mb-1">Sex</label>
-        <select v-model="form.sex" class="w-full px-4 py-2 neon-input rounded-xl">
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-        </select>
+        <USelect v-model="form.sex" :items="sexOptions" variant="none" class="neon-input w-full" :ui="selectUi" />
       </div>
 
       <div>
@@ -124,16 +140,12 @@ const goalOptions = [
 
       <div>
         <label class="block text-sm text-gray-400 mb-1">Activity</label>
-        <select v-model="form.activity_level" class="w-full px-4 py-2 neon-input rounded-xl">
-          <option v-for="opt in activityOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-        </select>
+        <USelect v-model="form.activity_level" :items="activityOptions" variant="none" class="neon-input w-full" :ui="selectUi" />
       </div>
 
       <div>
         <label class="block text-sm text-gray-400 mb-1">Goal</label>
-        <select v-model="form.goal" class="w-full px-4 py-2 neon-input rounded-xl">
-          <option v-for="opt in goalOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-        </select>
+        <USelect v-model="form.goal" :items="goalOptions" variant="none" class="neon-input w-full" :ui="selectUi" />
       </div>
 
       <div>

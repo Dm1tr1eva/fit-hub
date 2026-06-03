@@ -8,6 +8,7 @@ export type FavoriteCard = {
   carb_g: number
   source: "favorite" | "frequent"
   count?: number
+  _key?: string // stable v-for key that survives the optimistic→real id swap
 }
 
 export type FavoriteValues = {
@@ -38,6 +39,7 @@ export const useFavoritesStore = defineStore("favorites", () => {
       fat_g: f.fat_g ?? 0,
       carb_g: f.carb_g ?? 0,
       source: "favorite",
+      _key: f._key, // undefined for server rows → cardKey falls back to id
     })),
   )
 
@@ -114,9 +116,35 @@ export const useFavoritesStore = defineStore("favorites", () => {
   }
 
   async function add(values: FavoriteValues) {
-    const data = await $fetch<any>("/api/favorite", { method: "POST", body: values })
-    favorites.value = [data, ...favorites.value]
-    return data
+    // Optimistic: show the card immediately, reconcile with the server row in
+    // the background, roll back on failure. _key stays stable across the swap
+    // so <TransitionGroup> doesn't re-animate when the temp id becomes the real
+    // one (same trick as the meal list).
+    const tempId = `temp-${crypto.randomUUID()}`
+    favorites.value = [
+      {
+        id: tempId,
+        _key: tempId,
+        food_name: values.food_name,
+        grams: values.grams ?? null,
+        calories: values.calories ?? 0,
+        protein_g: values.protein_g ?? 0,
+        fat_g: values.fat_g ?? 0,
+        carb_g: values.carb_g ?? 0,
+        created_at: new Date().toISOString(),
+      },
+      ...favorites.value,
+    ]
+
+    try {
+      const data = await $fetch<any>("/api/favorite", { method: "POST", body: values })
+      const i = favorites.value.findIndex((f) => f.id === tempId)
+      if (i !== -1) favorites.value[i] = { ...data, _key: tempId } // keep stable key
+      return data
+    } catch (e) {
+      favorites.value = favorites.value.filter((f) => f.id !== tempId) // roll back
+      throw e
+    }
   }
 
   async function update(id: string, values: FavoriteValues) {

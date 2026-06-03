@@ -21,7 +21,7 @@ export function useFavoriteActions() {
     flashTimer = setTimeout(() => (flash.value = ""), 1800)
   }
 
-  const cardKey = (c: FavoriteCard) => c.id ?? c.food_name
+  const cardKey = (c: FavoriteCard) => c._key ?? c.id ?? c.food_name
 
   // Optimistic: add to the list immediately, sync with the server in the
   // background, roll back only if it fails. Lets you tap several in a row.
