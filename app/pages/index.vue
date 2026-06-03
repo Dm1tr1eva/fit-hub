@@ -2,8 +2,12 @@
 const store = useCalorieStore()
 const user = useSupabaseUser()
 
+// Stale-while-revalidate: cached store data shows instantly, these refresh it
+// in the background on every visit.
 onMounted(() => {
-  if (user.value?.sub) store.loadToday(user.value.sub)
+  if (!user.value?.sub) return
+  store.loadToday(user.value.sub)
+  store.loadWeek(user.value.sub)
 })
 
 const radius = 90
@@ -45,42 +49,16 @@ const macroDetails = computed(() => {
   ]
 })
 
-const weekData = ref<{ date: string; kcal: number }[]>([])
-const supabase = useSupabaseClient()
-
-async function loadWeek() {
-  if (!user.value?.sub) return
-  const weekAgo = new Date()
-  weekAgo.setDate(weekAgo.getDate() - 6)
-  const weekAgoStr = weekAgo.toISOString().split("T")[0]
-
-  const { data } = await supabase
-    .from("food_logs")
-    .select("log_date, calories")
-    .eq("user_id", user.value.sub)
-    .gte("log_date", weekAgoStr)
-    .order("log_date")
-
-  if (data) {
-    const grouped: Record<string, number> = {}
-    for (const row of data) {
-      grouped[row.log_date] = (grouped[row.log_date] ?? 0) + (row.calories ?? 0)
-    }
-    weekData.value = Object.entries(grouped).map(([date, kcal]) => ({
-      date,
-      kcal,
-    }))
-  }
-}
+const weekData = computed(() => store.weekData)
 
 async function deleteMeal(id: string) {
   const supabase = useSupabaseClient()
   await supabase.from("food_logs").delete().eq("id", id)
-  if (user.value?.sub) store.loadToday(user.value.sub)
-  loadWeek()
+  if (user.value?.sub) {
+    store.loadToday(user.value.sub)
+    store.loadWeek(user.value.sub)
+  }
 }
-
-onMounted(loadWeek)
 
 const maxWeekKcal = computed(() => Math.max(...weekData.value.map((d) => d.kcal), 1))
 </script>

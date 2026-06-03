@@ -1,5 +1,7 @@
 <script setup lang="ts">
-const user = useSupabaseUser()
+import type { Profile } from "~/stores/useProfileStore"
+
+const profileStore = useProfileStore()
 
 const form = ref({
   name: "",
@@ -12,58 +14,52 @@ const form = ref({
   daily_calorie_goal: null as number | null,
 })
 
-const goals = ref<{
-  daily_calorie_goal: number
-  daily_protein_g: number
-  daily_fat_g: number
-  daily_carb_g: number
-} | null>(null)
-
 const saving = ref(false)
 const saved = ref(false)
 
-async function loadProfile() {
-  if (!user.value) return
-  try {
-    const data = await $fetch("/api/profile")
-    if (data) {
-      form.value.name = data.name ?? ""
-      form.value.sex = data.sex ?? "male"
-      form.value.age = data.age ?? 30
-      form.value.height_cm = data.height_cm ?? 170
-      form.value.weight_kg = data.weight_kg ?? 70
-      form.value.activity_level = data.activity_level ?? "moderate"
-      form.value.goal = data.goal ?? "maintain"
-      form.value.daily_calorie_goal = data.daily_calorie_goal ?? null
-      goals.value = {
-        daily_calorie_goal: data.daily_calorie_goal,
-        daily_protein_g: data.daily_protein_g,
-        daily_fat_g: data.daily_fat_g,
-        daily_carb_g: data.daily_carb_g,
-      }
-    }
-  } catch {
-    // profile might not exist yet
+let formReady = false
+function fillForm(p: Profile) {
+  form.value = {
+    name: p.name ?? "",
+    sex: p.sex ?? "male",
+    age: p.age ?? 30,
+    height_cm: p.height_cm ?? 170,
+    weight_kg: p.weight_kg ?? 70,
+    activity_level: p.activity_level ?? "moderate",
+    goal: p.goal ?? "maintain",
+    daily_calorie_goal: p.daily_calorie_goal ?? null,
   }
+  formReady = true
 }
 
-onMounted(loadProfile)
+// Read-only goals card always reflects the cached/refreshed store profile.
+const goals = computed(() => {
+  const p = profileStore.profile
+  if (!p) return null
+  return {
+    daily_calorie_goal: p.daily_calorie_goal,
+    daily_protein_g: p.daily_protein_g,
+    daily_fat_g: p.daily_fat_g,
+    daily_carb_g: p.daily_carb_g,
+  }
+})
+
+// Paint the form instantly from cache, then revalidate in the background.
+if (profileStore.profile) fillForm(profileStore.profile)
+
+onMounted(async () => {
+  await profileStore.loadProfile()
+  // Only fill from a background refresh if the form wasn't already populated
+  // from cache — otherwise we'd clobber in-progress edits.
+  if (!formReady && profileStore.profile) fillForm(profileStore.profile)
+})
 
 async function save() {
   saving.value = true
   saved.value = false
 
   try {
-    const data = await $fetch("/api/profile", {
-      method: "PUT",
-      body: form.value,
-    })
-    goals.value = {
-      daily_calorie_goal: data.daily_calorie_goal,
-      daily_protein_g: data.daily_protein_g,
-      daily_fat_g: data.daily_fat_g,
-      daily_carb_g: data.daily_carb_g,
-    }
+    await profileStore.saveProfile(form.value)
     saved.value = true
   } catch {
     // show error
