@@ -179,6 +179,7 @@ async function favoriteMeal(meal: any) {
             <UIcon name="i-lucide-star" class="h-4 w-4" />
           </button>
           <button
+            v-if="isToday"
             class="p-1 text-gray-500 hover:text-cyan-400"
             aria-label="Edit"
             @click="openEdit(meal)"
@@ -186,6 +187,7 @@ async function favoriteMeal(meal: any) {
             <UIcon name="i-lucide-pencil" class="h-4 w-4" />
           </button>
           <button
+            v-if="isToday"
             class="p-1 text-gray-500 hover:text-rose-400"
             aria-label="Delete"
             @click="deleteMeal(meal.id)"

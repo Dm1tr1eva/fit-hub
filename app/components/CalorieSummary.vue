@@ -1,27 +1,43 @@
 <script setup lang="ts">
+const props = defineProps<{ date: string }>()
+
 const store = useCalorieStore()
+
+const isToday = computed(() => props.date === todayKey())
+
+// For today use store.totals (includes optimistic local updates from the ring).
+// For past days sum store.dayMeals, which DayMeals populates via store.loadDay().
+const displayTotals = computed(() => {
+  if (isToday.value) return store.totals
+  return {
+    kcal: Math.round(store.dayMeals.reduce((s: number, r: any) => s + (r.calories ?? 0), 0)),
+    protein: Math.round(store.dayMeals.reduce((s: number, r: any) => s + (r.protein_g ?? 0), 0)),
+    carb: Math.round(store.dayMeals.reduce((s: number, r: any) => s + (r.carb_g ?? 0), 0)),
+    fat: Math.round(store.dayMeals.reduce((s: number, r: any) => s + (r.fat_g ?? 0), 0)),
+  }
+})
 
 const radius = 56
 const circumference = 2 * Math.PI * radius
 
 const remaining = computed(() => {
-  if (!store.dailyGoal || !store.totals) return store.dailyGoal ?? 0
-  return Math.max(0, store.dailyGoal - store.totals.kcal)
+  if (!store.dailyGoal) return store.dailyGoal ?? 0
+  return Math.max(0, store.dailyGoal - displayTotals.value.kcal)
 })
 
 const progress = computed(() => {
-  if (!store.dailyGoal || !store.totals) return 0
-  return Math.min(1, store.totals.kcal / store.dailyGoal)
+  if (!store.dailyGoal) return 0
+  return Math.min(1, displayTotals.value.kcal / store.dailyGoal)
 })
 
 const dashOffset = computed(() => circumference * (1 - progress.value))
 
 const macroDetails = computed(() => {
-  if (!store.totals || !store.dailyGoal) return []
+  if (!store.dailyGoal) return []
   return [
-    { short: "P", icon: "i-lucide-beef", current: store.totals.protein, goal: store.dailyProtein, color: "fill-blue" },
-    { short: "F", icon: "i-lucide-hamburger", current: store.totals.fat, goal: store.dailyFat, color: "fill-amber" },
-    { short: "C", icon: "i-lucide-croissant", current: store.totals.carb, goal: store.dailyCarb, color: "fill-emerald" },
+    { short: "P", icon: "i-lucide-beef", current: displayTotals.value.protein, goal: store.dailyProtein, color: "fill-blue" },
+    { short: "F", icon: "i-lucide-hamburger", current: displayTotals.value.fat, goal: store.dailyFat, color: "fill-amber" },
+    { short: "C", icon: "i-lucide-croissant", current: displayTotals.value.carb, goal: store.dailyCarb, color: "fill-emerald" },
   ]
 })
 </script>

@@ -19,7 +19,7 @@ const selectedDate = ref(today)
 
 <template>
   <div class="p-4 max-w-md mx-auto space-y-6">
-    <CalorieSummary />
+    <CalorieSummary :date="selectedDate" />
     <WeekChart v-model="selectedDate" />
     <DayMeals :date="selectedDate" @back="selectedDate = today" />
   </div>
