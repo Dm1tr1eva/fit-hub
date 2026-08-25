@@ -2,5 +2,6 @@
   "buildCommand": "npx nuxi build",
   "outputDirectory": ".output/public",
   "framework": "nuxtjs",
-  "devCommand": "npx nuxi dev"
+  "devCommand": "npx nuxi dev",
+  "crons": [{ "path": "/api/keepalive", "schedule": "0 8 * * *" }]
 }
