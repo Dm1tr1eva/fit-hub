@@ -10,4 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping keepalive endpoint
-        run: curl -sf https://fit-hub-daryna1.vercel.app/api/keepalive
+        run: |
+          body=$(curl -sf https://fit-hub-one-rouge.vercel.app/api/keepalive)
+          echo "$body"
+          echo "$body" | grep -q '"ok":true'
