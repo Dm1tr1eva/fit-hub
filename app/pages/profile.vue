@@ -2,6 +2,7 @@
 import type { Profile } from "~/stores/useProfileStore"
 
 const profileStore = useProfileStore()
+const user = useSupabaseUser()
 
 const form = ref({
   name: "",
@@ -177,6 +178,8 @@ const goalOptions = [
       <p class="flex items-center gap-2"><UIcon name="i-lucide-hamburger" class="text-amber-400"/> {{ goals.daily_fat_g }} g fat</p>
       <p class="flex items-center gap-2"><UIcon name="i-lucide-croissant" class="text-emerald-400"/> {{ goals.daily_carb_g }} g carbs</p>
     </div>
+
+    <p v-if="user" class="text-center text-sm text-gray-500">Signed in as {{ user.email }}</p>
 
     <button
       class="w-full rounded-xl border border-rose-500/20 bg-rose-500/10 py-3 font-medium text-rose-300 transition-colors hover:bg-rose-500/20"
