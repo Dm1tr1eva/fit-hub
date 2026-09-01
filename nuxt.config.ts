@@ -21,11 +21,6 @@ export default defineNuxtConfig({
       },
     },
   },
-  nitro: {
-    routeRules: {
-      "/confirm": { ssr: false },
-    },
-  },
   supabase: {
     redirect: false,
     cookieOptions: {

@@ -37,19 +37,12 @@ async function submit() {
   loading.value = true
   error.value = ""
 
-  const { data, error: err } = await (isRegister.value
+  const { error: err } = await (isRegister.value
     ? supabase.auth.signUp({ email: email.value, password: password.value })
     : supabase.auth.signInWithPassword({ email: email.value, password: password.value }))
 
   if (err) {
     error.value = err.message
-    loading.value = false
-    return
-  }
-
-  // Registration with email confirmation enabled returns a user but no session.
-  if (isRegister.value && !data.session) {
-    error.value = "Check your email to confirm your registration"
     loading.value = false
     return
   }
