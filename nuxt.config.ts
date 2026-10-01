@@ -9,6 +9,28 @@ export default defineNuxtConfig({
     "@nuxt/ui",
   ],
   css: ["~/assets/css/main.css"],
+  // Link-preview meta (Open Graph / Twitter). Crawlers need an absolute image URL.
+  app: {
+    head: {
+      title: "Fit Hub — AI Calorie Tracker",
+      meta: [
+        { name: "description", content: "AI-powered calorie & macro tracker. Describe what you ate in plain words — AI logs the calories, protein, fat and carbs." },
+        { property: "og:type", content: "website" },
+        { property: "og:site_name", content: "Fit Hub" },
+        { property: "og:url", content: "https://fit-hub-one-rouge.vercel.app" },
+        { property: "og:title", content: "Fit Hub — AI Calorie Tracker" },
+        { property: "og:description", content: "Describe what you ate in plain words — AI logs the calories, protein, fat and carbs." },
+        { property: "og:image", content: "https://fit-hub-one-rouge.vercel.app/og-image.png" },
+        { property: "og:image:width", content: "1200" },
+        { property: "og:image:height", content: "630" },
+        { property: "og:image:alt", content: "Fit Hub — AI-powered calorie & macro tracker" },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: "Fit Hub — AI Calorie Tracker" },
+        { name: "twitter:description", content: "Describe what you ate in plain words — AI logs the calories, protein, fat and carbs." },
+        { name: "twitter:image", content: "https://fit-hub-one-rouge.vercel.app/og-image.png" },
+      ],
+    },
+  },
   colorMode: {
     preference: "dark",
   },
